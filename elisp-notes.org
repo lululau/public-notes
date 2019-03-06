@@ -1,0 +1,2097 @@
+#+TITLE: Emacs Lisp Notes
+#+HTML_HEAD: <link rel="stylesheet" title="Standard" href="http://liuxiang.gitcafe.io/assets/css/worg.css" type="text/css" /><script type="text/javascript" src="http://liuxiang.gitcafe.io/assets/js/org-toc.js">
+#+OPTIONS: H:3 ^:nil
+
+* Alist
+
+An "association list" or "alist" is a specially-constructed list whose
+elements are cons cells. In each element, the CAR is considered a "key",
+and the CDR is considered an "associated value". (In some cases, the
+associated value is stored in the CAR of the CDR.) Association lists are
+often used as stacks, since it is easy to add or remove associations at
+the front of the list.
+
+For example,
+
+#+BEGIN_SRC elisp
+(setq alist-of-colors
+      '((rose . red) (lily . white) (buttercup . yellow)))
+#+END_SRC
+
+* Read Syntax for Circular Objects
+
+#+BEGIN_SRC elisp
+(#1=(a) b #1#)
+#+END_SRC
+
+You can also use the same syntax to make a circular structure, which
+appears as an "element" within itself. Here is an example:
+
+#+BEGIN_SRC elisp
+#1=(a #1#)
+#+END_SRC
+
+* Equality Predicates
+
+** =eq=
+  This function returns =t= if OBJECT1 and OBJECT2 are the same object,
+  and =nil= otherwise. If OBJECT1 and OBJECT2 are integers with the same
+  value, they are considered to be the same object
+
+** =equal=
+  This function returns =t= if OBJECT1 and OBJECT2 have equal components,
+  and =nil= otherwise.
+
+** =eql=
+  This function acts like eq except when both arguments are numbers. It
+  compares numbers by type and numeric value, so that =(eql 0.0 1)=
+  returns nil, but =(eql 1.0 1.0)= and =(eql 1 1)= both return =t=.
+
+** ~=~
+  This function tests whether all its arguments are numerically equal, and
+  returns =t= if so, =nil= otherwise.
+
+** =equal-including-properties=
+  This function behaves like =equal= in all cases but also requires that
+  for two strings to be equal, they have the same text properties.
+
+* Numbers
+** Syntax for Integers in Bases other than 10
+
+The syntax for integers in bases other than 10 uses =#= followed by a
+letter that specifies the radix: =b= for binary, =o= for octal, =x= for
+hex, or =RADIXr= to specify radix RADIX. Case is not significant for the
+letter that specifies the radix. Thus, =#bINTEGER= reads INTEGER in
+binary, and =#RADIXrINTEGER= reads INTEGER in radix RADIX. Allowed
+values of RADIX run from 2 to 36. For example:
+
+#+BEGIN_SRC elisp
+#b101100 => 44
+#o54 => 44
+#x2c => 44
+#24r1k => 44
+#+END_SRC
+
+** Max Fixnums
+
+*** Variable: ~most-positive-fixnum~
+  The value of this variable is the largest integer that Emacs Lisp can
+  handle. Typical values are =2**29 - 1= on 32-bit and =2**61 - 1= on
+  64-bit platforms.
+
+*** Variable: ~most-negative-fixnum~
+  The value of this variable is the smallest integer that Emacs Lisp can
+  handle. It is negative. Typical values are =-2**29= on 32-bit and
+  =-2**61= on 64-bit platforms.
+
+** Numeric Conversions
+
+To convert an integer to floating point, use the function =float=.
+
+*** =float number=
+This returns NUMBER converted to floating point. If NUMBER is already
+floating point, ~float~ returns it unchanged.
+
+*** =truncate number &optional divisor=
+
+This returns NUMBER, converted to an integer by rounding towards zero.
+
+#+BEGIN_SRC elisp
+(truncate 1.2)
+      => 1
+(truncate 1.7)
+      => 1
+(truncate -1.2)
+      => -1
+(truncate -1.7)
+      => -1
+#+END_SRC
+
+*** =floor number &optional divisor=
+
+This returns NUMBER, converted to an integer by rounding downward
+(towards negative infinity).
+
+If DIVISOR is specified, this uses the kind of division operation that
+corresponds to =mod=, rounding downward.
+
+#+BEGIN_SRC elisp
+(floor 1.2)
+      => 1
+(floor 1.7)
+      => 1
+(floor -1.2)
+      => -2
+(floor -1.7)
+      => -2
+(floor 5.99 3)
+      => 1
+#+END_SRC
+
+*** =ceiling number &optional divisor=
+
+This returns NUMBER, converted to an integer by rounding upward (towards
+positive infinity).
+
+#+BEGIN_SRC elisp
+(ceiling 1.2)
+      => 2
+(ceiling 1.7)
+      => 2
+(ceiling -1.2)
+      => -1
+(ceiling -1.7)
+      => -1
+#+END_SRC
+
+*** =round number &optional divisor=
+
+This returns NUMBER, converted to an integer by rounding towards the
+nearest integer. Rounding a value equidistant between two integers
+returns the even integer.
+
+#+BEGIN_SRC elisp
+(round 1.2)
+      => 1
+(round 1.7)
+      => 2
+(round -1.2)
+      => -1
+(round -1.7)
+      => -2
+#+END_SRC
+
+** Arithmetic Operations
+
+*** =% dividend divisor=
+
+#+BEGIN_SRC elisp
+(% 9 4)
+  => 1
+(% -9 4)
+  => -1
+(% 9 -4)
+  => 1
+(% -9 -4)
+  => -1
+#+END_SRC
+
+*** =mod dividend divisor=
+
+Unlike =%=, =mod= permits floating-point arguments; it rounds the
+quotient downward (towards minus infinity) to an integer, and uses
+that quotient to compute the remainder.
+
+#+BEGIN_SRC elisp
+(mod 9 4)
+    => 1
+(mod -9 4)
+    => 3
+(mod 9 -4)
+    => -3
+(mod -9 -4)
+    => -1
+(mod 5.5 2.5)
+    => .5
+#+END_SRC
+
+** Bitwise Operations on Integers
+
+*** =lsh integer1 count=
+
+   =lsh=, which is an abbreviation for "logical shift", shifts the bits in
+   INTEGER1 to the left COUNT places, or to the right if COUNT is negative,
+   bringing zeros into the vacated bits. If COUNT is negative, =lsh= shifts zeros
+   into the leftmost (most-significant) bit, producing a positive result even if
+   INTEGER1 is negative. Contrast this with ~ash~, below.
+
+*** =ash integer1 count=
+
+=ash= ("arithmetic shift") shifts the bits in INTEGER1 to the left
+COUNT places, or to the right if COUNT is negative.
+
+=ash= gives the same results as =lsh= except when INTEGER1 and COUNT
+are both negative. In that case,
+=ash= puts ones in the  empty bit positions on the left, while=lsh=
+puts zeros in those bit positions.
+
+Here are other examples:
+
+#+BEGIN_SRC elisp
+                  ;         30-bit binary values
+
+(lsh 5 2)          ;   5  =  0000...000101
+    => 20         ;      =  0000...010100
+(ash 5 2)
+    => 20
+(lsh -5 2)         ;  -5  =  1111...111011
+    => -20        ;      =  1111...101100
+(ash -5 2)
+    => -20
+(lsh 5 -2)         ;   5  =  0000...000101
+    => 1          ;      =  0000...000001
+(ash 5 -2)
+    => 1
+(lsh -5 -2)        ;  -5  =  1111...111011
+    => 268435454
+                  ;      =  0011...111110
+(ash -5 -2)        ;  -5  =  1111...111011
+    => -2         ;      =  1111...111110
+#+END_SRC
+
+*** =logand &rest ints-or-markers=
+*** =logior &rest ints-or-markers=
+*** =logxor &rest ints-or-markers=
+*** =lognot integer=
+
+** Standard Mathematical Functions and Variables
+
+*** =expt x y=
+
+   This function returns X raised to power Y.
+
+*** Function: =sqrt arg=
+
+   This returns the square root of ARG. If ARG is finite and less than
+   zero, ~sqrt~ returns a NaN.
+
+*** Variable: =float-e=
+
+   The mathematical constant e (2.71828...).
+
+*** Variable: =float-pi=
+
+   The mathematical constant pi (3.14159...).
+
+** Random Numbers
+
+*** Function: =random &optional limit=
+
+   This function returns a pseudo-random integer. Repeated calls return
+   a series of pseudo-random integers.
+
+   If LIMIT is a positive integer, the value is chosen to be nonnegative
+   and less than LIMIT. Otherwise, the value might be any integer
+   representable in Lisp, i.e., an integer between
+   =most-negative-fixnum= and =most-positive-fixnum= .
+
+   If LIMIT is =t=, it means to choose a new seed as if Emacs were
+   restarting.
+
+   If LIMIT is a string, it means to choose a new seed based on the
+   string's contents.
+
+* String and Character
+** General Character Escape Syntax
+
+In addition to the specific escape sequences for special important
+control characters, Emacs provides several types of escape syntax that
+you can use to specify non-ASCII text characters.
+
+Firstly, you can specify characters by their Unicode values. =?\uNNNN=
+represents a character with Unicode code point =U+NNNN=, where NNNN is
+(by convention) a hexadecimal number with exactly four digits. The
+backslash indicates that the subsequent characters form an escape
+sequence, and the =u= specifies a Unicode escape sequence.
+
+There is a slightly different syntax for specifying Unicode characters
+with code points higher than =U+FFFF=: =?\U00NNNNNN= represents the
+character with code point =U+NNNNNN=, where NNNNNN is a six-digit
+hexadecimal number. The Unicode Standard only defines code points up to
+=U+10FFFF=, so if you specify a code point higher than that, Emacs
+signals an error.
+
+Secondly, you can specify characters by their hexadecimal character
+codes. A hexadecimal escape sequence consists of a backslash, =x=, and
+the hexadecimal character code. Thus, =?\x41= is the character =A=,
+=?\x1= is the character =C-a=, and =?\xe0= is the character =a= with
+grave accent. You can use any number of hex digits, so you can represent
+any character code in this way.
+
+Thirdly, you can specify characters by their character code in octal. An
+octal escape sequence consists of a backslash followed by up to three
+octal digits; thus, =?\101= for the character =A=, =?\001= for the
+character =C-a=, and =?\002= for the character =C-b=. Only characters up
+to octal code 777 can be specified this way.
+
+** Control-Character Syntax
+
+Both =?\^I= and =?\^i= are valid read syntax for the character =C-i=,
+the character whose value is 9. Instead of the =^=, you can use =C-=;
+thus, =?\C-i= is equivalent to =?\^I= and to =?\^i=:
+
+:     ?\^I => 9     ?\C-I => 9
+
+For historical reasons, Emacs treats the =<DEL>= character as the
+control equivalent of =?=:
+
+:     ?\^? => 127     ?\C-? => 127
+
+For representing control characters to be found in files or strings, we
+recommend the =^= syntax; for control characters in keyboard input, we
+prefer the =C-= syntax. Which one you use does not affect the meaning of
+the program, but may guide the understanding of people who read it.
+
+** Non-ASCII characters in string
+
+In hexadecimal and octal escape sequences, the escaped character code
+may contain a variable number of digits, so the first subsequent
+character which is not a valid hexadecimal or octal digit terminates the
+escape sequence. If the next character in a string could be interpreted
+as a hexadecimal or octal digit, write =\= (backslash and space) to
+terminate the escape sequence. For example, =\xe0\= represents one
+character, =a= with grave accent. =\= in a string constant is just like
+backslash-newline; it does not contribute any character to the string,
+but it does terminate any preceding hex escape.
+
+** Nonprinting Characters in Strings
+
+You can use the same backslash escape-sequences in a string constant as
+in character literals (but do not use the question mark that begins a
+character constant). For example, you can write a string containing the
+nonprinting characters tab and
+=C-a=, with commas and spaces between them, like this: ="\t, \C-a"=.
+*Note Character Type::, for a description of the read syntax for
+characters.
+
+However, not all of the characters you can write with backslash
+escape-sequences are valid in strings. The only control characters that
+a string can hold are the ASCII control characters. Strings do not
+distinguish case in ASCII control characters.
+
+Properly speaking, strings cannot hold meta characters; but when a string is to
+be used as a key sequence, there is a special convention that provides a way to
+represent meta versions of ASCII characters in a string. If you use the =\M-'=
+syntax to indicate a meta character in a string constant, this sets the 2**7 bit
+of the character in the string. If the string is used in =define-key= or
+~lookup-key~, this numeric code is translated into the equivalent meta
+character. *Note Character Type::.
+
+Strings cannot hold characters that have the hyper, super, or alt
+modifiers.
+
+** Text Properties in Strings
+
+Strings with text properties use a special read and print syntax:
+
+:     #("CHARACTERS" PROPERTY-DATA...)
+
+where PROPERTY-DATA consists of zero or more elements, in groups of
+three as follows:
+
+:     BEG END PLIST
+
+The elements BEG and END are integers, and together specify a range of
+indices in the string; PLIST is the property list for that range. For
+example,
+
+:     #("foo bar" 0 3 (face bold) 3 4 nil 4 7 (face italic))
+
+** Common string functions
+
+*** Function: =make-string count character=
+
+#+BEGIN_SRC elisp
+(make-string 5 ?x)
+  => "xxxxx"
+#+END_SRC
+
+*** Function: =string &rest characters=
+
+#+BEGIN_SRC elisp
+(string ?a ?b ?c)
+  => "abc"
+#+END_SRC
+
+*** Function: =substring string start &optional end=
+
+#+BEGIN_SRC elisp
+(substring "abcdefg" 0 3)
+    => "abc"
+(substring "abcdefg" -3 nil)
+    => "efg"
+#+END_SRC
+
+If the characters copied from STRING have text properties, the
+properties are copied into the new string also.
+
+=substring= also accepts a vector for the first argument. For
+example:
+
+#+BEGIN_SRC elisp
+(substring [a b (c) "d"] 1 3)
+    => [b (c)]
+#+END_SRC
+
+*** Function: =substring-no-properties string &optional start end=
+*** Function: =concat &rest sequences=
+
+The arguments may be strings, lists of numbers, or vectors of numbers
+
+#+BEGIN_SRC elisp
+(concat "abc" "-def")
+    => "abc-def"
+(concat "abc" (list 120 121) [122])
+    => "abcxyz"
+;; `nil' is an empty sequence.
+(concat "abc" nil "-def")
+    => "abc-def"
+(concat "The " "quick brown " "fox.")
+    => "The quick brown fox."
+(concat)
+    => ""
+#+END_SRC
+
+*** Function: =split-string string &optional separators omit-nulls trim=
+
+If OMIT-NULLS is =nil= (or omitted), the result contains null strings
+whenever there are two consecutive matches for SEPARATORS, or a match
+is adjacent to the beginning or end of STRING. If OMIT-NULLS is =t=,
+these null strings are omitted from the result.
+
+If SEPARATORS is =nil= (or omitted), the default is the value of
+=split-string-default-separators=.
+
+As a special case, when SEPARATORS is =nil= (or omitted), null
+strings are always omitted from the result. Thus:
+
+#+BEGIN_SRC elisp
+(split-string "  two words ")
+  => ("two" "words")
+#+END_SRC
+
+If the optional argument TRIM is non- =nil=, it should be a regular
+expression to match text to trim from the beginning and end of each
+substring. If trimming makes the substring empty, it is treated as
+null.
+
+#+BEGIN_SRC elisp
+(split-string "=hello= =world=" split-string-default-separators  t "=")
+  => ("hello" "world")
+#+END_SRC
+
+*** Variable: =split-string-default-separators= The default value of
+   SEPARATORS for =split-string=. Its usual value is ="[ \f\t\n\r\v]+"=.
+
+*** Function: =store-substring string idx obj=
+
+#+BEGIN_SRC elisp
+(store-substring "hello world" 9 "AB")
+    => "hello worAB"
+
+(store-substring "hello world" 9 "ABC")
+    => (args-out-of-range "hello world" 11)
+#+END_SRC
+
+*** Function: =char-equal character1 character2=
+
+#+BEGIN_SRC elisp
+(char-equal ?X ?x)
+    => t
+(let ((case-fold-search nil)) (char-equal ?X ?x))
+    => nil
+#+END_SRC
+
+*** Function: =string= string1 string2= 或 =string-equal string1 string2=
+
+This function returns =t= if the characters of the two strings match
+exactly. Symbols are also allowed as arguments, in which case the
+symbol names are used. Case is always significant, regardless of
+=case-fold-search=.
+
+This function is equivalent to =equal= for comparing two strings
+(*note Equality Predicates::). In particular, the text properties of
+the two strings are ignored; use =equal-including-properties= if you
+need to distinguish between strings that differ only in their text
+properties. However, unlike =equal=, if either argument is not a
+string or symbol, =string== signals an error.
+
+#+BEGIN_SRC elisp
+(string= "abc" "abc")
+  => t
+(string= "abc" "ABC")
+  => nil
+(string= "ab" "ABC")
+  => nil
+#+END_SRC
+
+*** Function =string< string2 string2= or =string-less-p string1 string2=
+*** Function: =string-prefix-p prefix string2 &optional ignore-case=
+*** Function: =string-suffix-p suffix string &optional ignore-case=
+*** Function: =compare-strings string1 start1 end1 string2 start2 end2 &optional ignore-case=
+
+If the specified portions of the two strings match, the value is =t=.
+Otherwise, the value is an integer which indicates how many leading
+characters agree, and which string is less. Its absolute value is one
+plus the number of characters that agree at the beginning of the two
+strings. The sign is negative if STRING1 (or its specified portion)
+is less.
+
+*** Function: =assoc-string key alist &optional case-fold=
+
+#+BEGIN_SRC elisp
+(setq alst '((hello . world) (liu xiang) "test"))
+(assoc-string 'hello alst)
+  => (hello . world)
+(assoc 'hello alst)
+  => (hello . world)
+(assoc-string "test" alst)
+  => "test"
+(assoc "test" alst)
+  => "test"
+#+END_SRC
+
+*** Function: =number-to-string number=
+*** Function: =string-to-number string &optional base=
+*** Function: =char-to-string character=
+*** Function: =string-to-char string=
+   This function returns the first character in STRING.
+
+*** Function: =concat &rest sequences=
+
+This function returns a new string consisting of the characters in the
+arguments passed to it (along with their text properties, if any). The
+arguments may be strings, lists of numbers, or vectors of numbers; they
+are not themselves changed. If concat receives no arguments, it returns
+an empty string.
+
+#+BEGIN_SRC elisp
+(concat "abc" "-def")
+      ⇒ "abc-def"
+(concat "abc" (list 120 121) [122])
+      ⇒ "abcxyz"
+;; nil is an empty sequence.
+(concat "abc" nil "-def")
+      ⇒ "abc-def"
+(concat "The " "quick brown " "fox.")
+      ⇒ "The quick brown fox."
+(concat)
+      ⇒ ""
+#+END_SRC
+
+*** Function: =vconcat &rest sequences=
+
+This function returns a new vector containing all the elements of
+sequences. The arguments sequences may be true lists, vectors, strings
+or bool-vectors. If no sequences are given, the empty vector is
+returned.
+
+The value is either the empty vector, or is a newly constructed nonempty
+vector that is not eq to any existing vector.
+
+#+BEGIN_SRC elisp
+(setq a (vconcat '(A B C) '(D E F)))
+      ⇒ [A B C D E F]
+(eq a (vconcat a))
+      ⇒ nil
+(vconcat)
+      ⇒ []
+(vconcat [A B C] "aa" '(foo (6 7)))
+      ⇒ [A B C 97 97 foo (6 7)]
+#+END_SRC
+
+*** Function: =format string &rest objects=
+
+*** Function: =downcase string-or-char=
+*** Function: =upcase string-or-char=
+*** Function: =capitalize string-or-char=
+
+#+BEGIN_SRC elisp
+(capitalize "The cat in the hat")
+    => "The Cat In The Hat"
+
+(capitalize "THE 77TH-HATTED CAT")
+    => "The 77th-Hatted Cat"
+#+END_SRC
+
+*** Function: =upcase-initials string-or-char=
+
+#+BEGIN_SRC elisp
+(upcase-initials "The CAT in the hAt")
+  => "The CAT In The HAt"
+#+END_SRC
+
+* Lists Functions
+
+** Function: =consp object=
+
+   This function returns =t= if OBJECT is a cons cell, =nil= otherwise.
+   =nil= is not a cons cell, although it is a list.
+
+** Function: =atom object=
+
+#+BEGIN_SRC elisp
+(atom OBJECT) == (not (consp OBJECT))
+#+END_SRC
+
+** Function: =listp object=
+
+#+BEGIN_SRC elisp
+(listp OBJECT) == (or nil (consp OBJECT))
+#+END_SRC
+
+** Function: =nlistp object=
+
+#+BEGIN_SRC elisp
+(nlistp OBJECT) == (not (listp OBJECT))
+#+END_SRC
+
+** Function: =null object=
+
+#+BEGIN_SRC elisp
+(null OBJECT) == (not OBJECT)
+#+END_SRC
+
+** =length sequence= VS =safe-length list=
+** =butlast x &optional n= VS =nbutlast x &optional n=
+
+   =nbutlast= is a version of =butlast= that works by destructively
+   modifying the ~cdr~ of the appropriate element, rather than making a
+   copy of the list.
+
+** =reverse list= VS =nreverse list=
+
+This function reverses the order of the elements of list. Unlike
+reverse, nreverse alters its argument by reversing the cdrs in the cons
+cells forming the list. The cons cell that used to be the last one in
+list becomes the first cons cell of the value.
+
+** Function: =append &rest sequences= VS Function: =nconc &rest lists=
+** Function: =copy-tree tree &optional vecp=
+
+   This function returns a copy of the tree =tree=. If TREE is a cons
+   cell, this makes a new cons cell with the same CAR and CDR, then
+   recursively copies the CAR and CDR in the same way.
+
+   Normally, when TREE is anything other than a cons cell, =copy-tree=
+   simply returns TREE. However, if VECP is non- =nil=, it copies vectors
+   too (and operates recursively on their elements).
+
+** Function: =number-sequence from &optional to separation=
+** Function: =sort list predicate=
+
+   This function sorts LIST stably, though destructively, and returns
+   sorted list. It compares elements using PREDICATE.
+
+** Function: =memq object list=
+** Function: =delq object list=
+** Function: =remq object list=
+** Function: =memql object list=
+** Function: =member object list=
+** Function: =delete object sequence=
+** Function: =remove object sequence=
+** Function: =member-ignore-case object list=
+** Function: =delete-dups list=
+** Function: =assoc key alist=
+** Function: =rassoc value alist=
+** Function: =assq key alist=
+** Function: =rassq value alist=
+** Function: =assoc-default key alist &optional test default=
+
+This function searches ALIST for a match for KEY. For each element of
+ALIST, it compares the element (if it is an atom) or the element's
+CAR (if it is a cons) against KEY, by calling TEST with two
+arguments: the element or its CAR, and KEY. The arguments are passed
+in that order so that you can get useful results using =string-match=
+with an alist that contains regular expressions (*note Regexp
+Search::). If TEST is omitted or =nil=, =equal= is used for
+comparison.
+
+If an alist element matches KEY by this criterion, then
+=assoc-default= returns a value based on this element. If the element
+is a cons, then the value is the element's CDR. Otherwise, the return
+value is DEFAULT.
+
+If no alist element matches KEY, =assoc-default= returns =nil=.
+
+** Function: =copy-alist alist=
+
+This function returns a two-level deep copy of ALIST: it creates a
+new copy of each association, so that you can alter the associations
+of the new alist without changing the old one.
+
+** Function: =assq-delete-all key alist=
+** Function: =rassq-delete-all value alist=
+** Function: =plist-get plist property=
+** Function: =plist-put plist property value=
+** Function: =lax-plist-get plist property=
+
+   Like =plist-get= except that it compares properties using =equal=
+   instead of =eq=
+** Function: =lax-plist-put plist property value=
+
+   Like =plist-put= except that it compares properties using =equal=
+   instead of =eq=
+** Function: =plist-member plist property=
+
+   This returns non- =nil= if PLIST contains the given PROPERTY. Unlike
+   =plist-get=, this allows you to distinguish between a missing
+   property and a property with the value =nil=. The value is actually
+   the tail of PLIST whose =car= is PROPERTY.
+
+* Sequences, Arrays, and Vectors
+
+The following diagram shows the relationship between these sequences
+types:
+
+#+BEGIN_EXAMPLE
+  _____________________________________________
+|                                             |
+|          Sequence                           |
+|  ______   ________________________________  |
+| |      | |                                | |
+| | List | |             Array              | |
+| |      | |    ________       ________     | |
+| |______| |   |        |     |        |    | |
+|          |   | Vector |     | String |    | |
+|          |   |________|     |________|    | |
+|          |  ____________   _____________  | |
+|          | |            | |             | | |
+|          | | Char-table | | Bool-vector | | |
+|          | |____________| |_____________| | |
+|          |________________________________| |
+|_____________________________________________|
+#+END_EXAMPLE
+
+** =nth index list= VS =elt sequence index=
+
+#+BEGIN_SRC elisp
+(setq xx ~(1 2 3 4 5))
+(setq yy [1 2 3 4 5])
+
+(nth 3 xx)
+  => 4
+(nth -1 xx)
+  => 1
+(nth 10 xx)
+  => nil
+(nth 3 yy)
+  => wrong-type-argument error
+(elt xx 3)
+  => 4
+(elt xx -1)
+  => 1
+(elt xx 10)
+  => nil
+(elt yy 3)
+  => 4
+(elt yy -1)
+  => args-out-of-range error
+(elt yy 10)
+  => args-out-of-range error
+#+END_SRC
+
+** Function: =sequencep object=
+** Function: =length sequence=
+** Function: =copy-sequence sequence=
+
+   Storing a new element into the copy does not affect the original
+   SEQUENCE, and vice versa. However, the elements of the new sequence
+   are not copies; they are identical (=eq=) to the elements of the
+   original.
+
+** Function: =arrayp object=
+** Function: =aref array index=
+** Function: =aset array index object=
+** Function: =fillarray array object=
+** Function: =vectorp object=
+** Function: =vector &rest objects=
+** Function: =make-vector length object=
+** Function: =vconcat &rest sequences=
+** Function: =make-char-table subtype &optional init=
+** Function: =char-table-p object=
+** Function: =char-table-subtype char-table=
+** Function: =char-table-parent char-table=
+** Function: =set-char-table-parent char-table new-parent=
+** Function: =char-table-extra-slot char-table n=
+** Function: =set-char-table-extra-slot char-table n value=
+** Function: =char-table-range char-table range=
+
+   This returns the value specified in CHAR-TABLE for a range of
+   characters RANGE. Here are the possibilities for RANGE:
+
+   =nil= Refers to the default value.
+
+   CHAR Refers to the element for character CHAR (supposing CHAR is a
+   valid character code).
+
+   =(FROM . TO)= A cons cell refers to all the characters in the
+   inclusive range =[FROM..TO]=.
+
+** Function: =set-char-table-range char-table range value=
+
+   This function sets the value in CHAR-TABLE for a range of characters
+   RANGE. Here are the possibilities for RANGE:
+
+   =nil= Refers to the default value.
+
+   =t= Refers to the whole range of character codes.
+
+   CHAR Refers to the element for character CHAR (supposing CHAR is a
+   valid character code).
+
+   =(FROM . TO)= A cons cell refers to all the characters in the
+   inclusive range =[FROM..TO]=.
+
+** Function: =map-char-table function char-table=
+
+   This function calls its argument FUNCTION for each element of
+   CHAR-TABLE that has a non- =nil= value. The call to FUNCTION is with
+   two arguments, a key and a value. The key is a possible RANGE
+   argument for =char-table-range= --either a valid character or a cons
+   cell =(FROM . TO)=, specifying a range of characters that share the
+   same value. The value is what =(char-table-range  CHAR-TABLE KEY)=
+   returns.
+
+** Function: =make-bool-vector length initial=
+** Function: =bool-vector-p object=
+** Function: =bool-vector-exclusive-or a b &optional c=
+
+   Return "bitwise exclusive or" of bool vectors A and B.
+
+** Function: =bool-vector-union a b &optional c=
+
+   Return "bitwise or" of bool vectors A and B.
+
+** Function: =bool-vector-intersection a b &optional c=
+
+   Return "bitwise and" of bool vectors A and B.
+
+** Function: =bool-vector-set-difference a b &optional c=
+
+   Return "set difference" of bool vectors A and B.
+
+** Function: =bool-vector-not a &optional b=
+
+   Return "set complement" of bool vector A.
+
+** Function: =bool-vector-subsetp a b=
+
+   Return =t= if every =t= value in A is also t in B, =nil= otherwise.
+   All arguments should be bool vectors of the same length.
+
+** Function: =bool-vector-count-consecutive a b i=
+
+   Return the number of consecutive elements in A equal B starting at
+
+   1. =a= is a bool vector, B is =t= or =nil=, and I is an index into
+      =a=. Index is 1-based, not 0-based.
+
+** Function: =bool-vector-count-population a=
+
+   Return the number of elements that are =t= in bool vector A.
+
+Here is an example of creating, examining, and updating a bool-vector.
+Note that the printed form represents up to 8 boolean values as a single
+character.
+
+#+BEGIN_SRC elisp
+(setq bv (make-bool-vector 5 t))
+  => #&5"^_"
+(aref bv 1)
+  => t
+(aset bv 3 nil)
+  => nil
+bv
+  => #&5"^W"
+#+END_SRC
+
+These results make sense because the binary codes for control-\_ and
+control-W are 11111 and 10111, respectively.
+
+** Function: =make-ring size=
+
+   This returns a new ring capable of holding SIZE objects. SIZE should
+   be an integer.
+
+** Function: =ring-p object=
+
+   This returns =t= if OBJECT is a ring, =nil= otherwise.
+
+** Function: =ring-size ring=
+
+   This returns the maximum capacity of the RING.
+
+** Function: =ring-length ring=
+
+   This returns the number of objects that RING currently contains. The
+   value will never exceed that returned by =ring-size=.
+
+** Function: =ring-elements ring=
+
+   This returns a of the objects in RING, in order, newest first.
+
+** Function: =ring-copy ring=
+
+   This returns a new ring which is a copy of RING. The new ring
+   contains the same (=eq=) objects as RING.
+
+** Function: =ring-empty-p ring=
+
+   This returns =t= if RING is empty, =nil= otherwise.
+
+The newest element in the ring always has index 0. Higher indices
+correspond to older elements. Indices are computed modulo the ring
+length. Index -1 corresponds to the oldest element, -2 to the
+next-oldest, and so forth.
+
+** Function: =ring-ref ring index=
+
+   This returns the object in RING found at index INDEX. INDEX may be
+   negative or greater than the ring length. If RING is empty,
+   =ring-ref= signals an error.
+
+** Function: =ring-insert ring object=
+
+   This inserts OBJECT into RING, making it the newest element, and
+   returns OBJECT.
+
+   If the ring is full, insertion removes the oldest element to make
+   room for the new element.
+
+** Function: =ring-remove ring &optional index=
+
+   Remove an object from RING, and return that object. The argument
+   INDEX specifies which item to remove; if it is =nil=, that means to
+   remove the oldest item. If RING is empty, =ring-remove= signals an
+   error.
+
+** Function: =ring-insert-at-beginning ring object=
+
+This inserts OBJECT into RING, treating it as the oldest element. The
+return value is not significant.
+
+If the ring is full, this function removes the newest element to make
+room for the inserted element.
+
+If you are careful not to exceed the ring size, you can use the ring as
+a first-in-first-out queue. For example:
+
+#+BEGIN_SRC elisp
+(let ((fifo (make-ring 5)))
+  (mapc (lambda (obj) (ring-insert fifo obj))
+        ~(0 one "two"))
+  (list (ring-remove fifo) t
+        (ring-remove fifo) t
+        (ring-remove fifo)))
+    => (0 t one t "two")
+#+END_SRC
+
+* Hash Tables
+
+A hash table is a very fast kind of lookup table, somewhat like an alist
+in that it maps keys to corresponding values, but much faster. The
+printed representation of a hash table specifies its properties and
+contents, like this:
+
+#+BEGIN_SRC elisp
+(make-hash-table)
+    => #s(hash-table size 65 test eql rehash-size 1.5
+                            rehash-threshold 0.8 data ())
+#+END_SRC
+
+** Function: =make-hash-table &rest keyword-args=
+
++ =:test TEST=
+  This specifies the method of key lookup for this hash table.
+  The default is ~eql~; ~eq~ and ~equal~ are other alternatives:
++ =:weakness WEAK=
+  The value, WEAK, must be one of ~nil~, ~key~, ~value~,
+  ~key-or-value~, ~key-and-value~, or ~t~ which is an alias for
+  ~key-and-value~.  If WEAK is ~key~ then the hash table does
+  not prevent its keys from being collected as garbage (if they
+  are not referenced anywhere else); if a particular key does
+  get collected, the corresponding association is removed from
+  the hash table.
++ =:size SIZE=
++ =:rehash-size REHASH-SIZE=
+  When you add an association to a hash table and the table is
+  "full", it grows automatically.  This value specifies how to
+  make the hash table larger, at that time.
+  If REHASH-SIZE is an integer, it should be positive, and the
+  hash table grows by adding that much to the nominal size.  If
+  REHASH-SIZE is floating point, it had better be greater than
+  1, and the hash table grows by multiplying the old size by
+  that number.
+  The default value is 1.5.
++ =:rehash-threshold THRESHOLD=
+  This specifies the criterion for when the hash table is
+  "full" (so it should be made larger).  The value, THRESHOLD,
+  should be a positive floating-point number, no greater than
+  1.  The hash table is "full" whenever the actual number of
+  entries exceeds this fraction of the nominal size.  The
+  default for THRESHOLD is 0.8.
+
+** Function: =makehash &optional test=
+
+You can also create a new hash table using the printed representation
+for hash tables:
+
+#+BEGIN_SRC elisp
+#s(hash-table size 30 data (key1 val1 key2 300))
+#+END_SRC
+
+** Function: =gethash key table &optional default=
+** Function: =puthash key value table=
+** Function: =remhash key table=
+** Function: =clrhash table=
+** Function: =maphash function table=
+
+** Function: =define-hash-table-test name test-fn hash-fn=
+
+** Function: =sxhash obj=
+
+This example creates a hash table whose keys are strings that are
+compared case-insensitively.
+
+#+BEGIN_EXAMPLE
+(defun case-fold-string= (a b)
+  (eq t (compare-strings a nil nil b nil nil t)))
+(defun case-fold-string-hash (a)
+  (sxhash (upcase a)))
+
+(define-hash-table-test 'case-fold
+  'case-fold-string= 'case-fold-string-hash)
+
+(make-hash-table :test 'case-fold)
+#+END_EXAMPLE
+
+** Function: =hash-table-p table=
+** Function: =copy-hash-table table=
+** Function: =hash-table-count table=
+** Function: =hash-table-test table=
+** Function: =hash-table-weakness table=
+** Function: =hash-table-rehash-size table=
+** Function: =hash-table-rehash-threshold table=
+** Function: =hash-table-size table=
+
+* Symbols
+
+** Each symbol has four components (or "cells"), each of which references another object:
+
+-  Print name ::   The symbol's name.
+-  Value ::   The symbol's current value as a variable.
+-  Function ::   The symbol's function definition. It can also hold a symbol, a keymap, or a keyboard macro.
+-  Property list
+   The symbol's property list.
+
+** In an empty obarray, every element is 0, so you can create an obarray
+with =(make-vector LENGTH 0)=. /This is the only valid way to create an
+obarray./
+
+** Function: =make-symbol name=
+
+#+BEGIN_SRC elisp
+(setq sym (make-symbol "foo"))
+    => foo
+(eq sym 'foo)
+    => nil
+#+END_SRC
+
+** Function: =intern name &optional obarray=
+
+#+BEGIN_SRC elisp
+(setq sym (intern "foo"))
+    => foo
+(eq sym 'foo)
+    => t
+
+(setq sym1 (intern "foo" other-obarray))
+    => foo
+(eq sym1 'foo)
+    => nil
+#+END_SRC
+
+** Function: =intern-soft name &optional obarray=
+
+This function returns the symbol in OBARRAY whose name is NAME, or
+=nil= if OBARRAY has no symbol with that name. Therefore, you can use
+=intern-soft= to test whether a symbol with a given name is already
+interned. If OBARRAY is omitted, the value of the global variable
+=obarray= is used.
+
+The argument NAME may also be a symbol; in that case, the function
+returns NAME if NAME is interned in the specified obarray, and
+otherwise =nil=.
+
+#+BEGIN_SRC elisp
+(intern-soft "frazzle")        ; No such symbol exists.
+    => nil
+(make-symbol "frazzle")        ; Create an uninterned one.
+    => frazzle
+(intern-soft "frazzle")        ; That one cannot be found.
+    => nil
+(setq sym (intern "frazzle"))  ; Create an interned one.
+    => frazzle
+(intern-soft "frazzle")        ; That one can be found!
+    => frazzle
+(eq sym 'frazzle)              ; And it is the same one.
+    => t
+#+END_SRC
+
+** Variable: =obarray=
+
+   This variable is the standard obarray for use by =intern= and =read=.
+
+** Function: =mapatoms function &optional obarray=
+
+This function calls FUNCTION once with each symbol in the obarray
+OBARRAY. Then it returns =nil=. If OBARRAY is omitted, it defaults to
+the value of =obarray=, the standard obarray for ordinary symbols.
+
+#+BEGIN_SRC elisp
+(setq count 0)
+    => 0
+(defun count-syms (s)
+  (setq count (1+ count)))
+    => count-syms
+(mapatoms 'count-syms)
+    => nil
+count
+    => 1871
+#+END_SRC
+
+** Function: =unintern symbol obarray=
+** Function: =get symbol property=
+** Function: =put symbol property value=
+** Function: =symbol-plist symbol=
+** Function: =setplist symbol plist=
+** Function: =function-get symbol property=
+
+This function is identical to `get', except that if SYMBOL is the
+name of a function alias, it looks in the property list of the symbol
+naming the actual function. *Note Defining Functions::.
+
+* Evaluation
+
+Emacs has three different kinds of form that are evaluated differently:
+symbols, lists, and "all other types".
+
+** Function: =indirect-function function &optional noerror=
+
+#+BEGIN_SRC elisp
+(defun hello ()
+  (message "hello"))
+  => hello
+
+(fset 'hehe 'hello)
+  => hello
+
+(setq xx (indirect-function 'hello))
+  => (lambda nil (message "hello"))
+
+(setq yy (indirect-function 'hehe))
+  => (lambda nil (message "hello"))
+
+(indirect-function xx)
+  => (lambda nil (message "hello"))
+
+(indirect-function yy
+  => (lambda nil (message "hello"))
+#+END_SRC
+
+** User Option: =max-lisp-eval-depth=
+
+** Variable: =values=
+
+* Control Structures
+
+** Macro: =unless condition forms...=
+
+** Special Form: =cond clause...=
+
+=cond= chooses among an arbitrary number of alternatives. Each CLAUSE
+in the =cond= must be a list. The CAR of this list is the CONDITION;
+the remaining elements, if any, the BODY-FORMS. Thus, a clause looks
+like this:
+
+: (CONDITION BODY-FORMS...)
+
+=cond= tries the clauses in textual order, by evaluating the
+CONDITION of each clause. If the value of CONDITION is non- =nil=, the
+clause "succeeds"; then =cond= evaluates its BODY-FORMS, and returns
+the value of the last of BODY-FORMS. Any remaining clauses are
+ignored.
+
+If the value of CONDITION is =nil=, the clause "fails", so the =cond=
+moves on to the following clause, trying its CONDITION.
+
+A clause may also look like this:
+
+: (CONDITION)
+
+Then, if CONDITION is non- =nil= when tested, the =cond= form returns
+the value of CONDITION.
+
+If every CONDITION evaluates to =nil=, so that every clause fails,
+=cond= returns =nil=.
+
+** Pattern matching case statement
+
+To compare a particular value against various possible cases, the macro
+=pcase= can come handy. It takes the following form:
+
+: (pcase EXP BRANCH1 BRANCH2 BRANCH3 ...)
+
+where each BRANCH takes the form ~(UPATTERN BODY-FORMS...)~.
+
+It will first evaluate EXP and then compare the value against each
+
+UPATTERN to see which BRANCH to use, after which it will run the
+corresponding BODY-FORMS. A common use case is to distinguish between a
+few different constant values:
+
+#+BEGIN_SRC elisp
+(pcase (get-return-code x)
+  (`success       (message "Done!"))
+  (`would-block   (message "Sorry, can`t do it now"))
+  (`read-only     (message "The shmliblick is read-only"))
+  (`access-denied (message "You do not have the needed rights"))
+  (code           (message "Unknown return code %S" code)))
+#+END_SRC
+
+In the last clause, ~code~ is a variable that gets bound to the
+value that was returned by =(get-return-code x)=.
+To give a more complex example, a simple interpreter for a little
+expression language could look like (note that this example requires
+lexical binding):
+
+#+BEGIN_SRC elisp
+(defun evaluate (exp env)
+  (pcase exp
+    (`(add ,x ,y)       (+ (evaluate x env) (evaluate y env)))
+    (`(call ,fun ,arg)  (funcall (evaluate fun env) (evaluate arg env)))
+    (`(fn ,arg ,body)   (lambda (val)
+                          (evaluate body (cons (cons arg val) env))))
+    ((pred numberp)     exp)
+    ((pred symbolp)     (cdr (assq exp env)))
+    (_                  (error "Unknown expression %S" exp))))
+#+END_SRC
+
+Where ~(add ,x ,y)~ is a pattern that checks that ~exp~ is a three
+element list starting with the symbol =add=, then extracts the second
+and third elements and binds them to the variables =x= and =y=.
+=(pred   numberp)= is a pattern that simply checks that =exp= is a
+number, and =_= is the catch-all pattern that matches anything.
+
+Here are some sample programs including their evaluation results:
+#+BEGIN_SRC elisp
+(evaluate `(add 1 2) nil)                 ;=> 3
+(evaluate `(add x y) `((x . 1) (y . 2)))  ;=> 3
+(evaluate `(call (fn x (add 1 x)) 2) nil) ;=> 3
+(evaluate `(sub 1 2) nil)                 ;=> error
+#+END_SRC
+
+There are two kinds of patterns involved in ~pcase~, called
+/U-patterns/ and /Q-patterns/. The UPATTERN mentioned above are
+U-patterns and can take the following forms:
+
+*** =`QPATTERN=
+
+   This is one of the most common form of patterns. The intention is to
+   mimic the backquote macro: this pattern matches those values that
+   could have been built by such a backquote expression. Since we`re
+   pattern matching rather than building a value, the unquote does not
+   indicate where to plug an expression, but instead it lets one specify
+   a U-pattern that should match the value at that location.
+
+   More specifically, a Q-pattern can take the following forms:
+   =(QPATTERN1 . QPATTERN2)= This pattern matches any cons cell whose
+   =car= matches QPATTERN1 and whose =cdr= matches PATTERN2.
+
+   =ATOM= This pattern matches any atom =equal= to ATOM.
+
+   =,UPATTERN= This pattern matches any object that matches the
+   UPATTERN.
+
+*** =SYMBOL=
+
+   A mere symbol in a U-pattern matches anything, and additionally
+   let-binds this symbol to the value that it matched, so that you can
+   later refer to it, either in the BODY-FORMS or also later in the
+   pattern.
+
+*** =_=
+
+   This so-called /don`t care/ pattern matches anything, like the
+   previous one, but unlike symbol patterns it does not bind any
+   variable.
+
+*** =(pred PRED)=
+
+   This pattern matches if the function PRED returns non-=nil= when
+   called with the object being matched.
+
+*** =(or UPATTERN1 UPATTERN2...)=
+
+   This pattern matches as soon as one of the argument patterns
+   succeeds. All argument patterns should let-bind the same variables.
+
+*** =(and UPATTERN1 UPATTERN2...)=
+
+   This pattern matches only if all the argument patterns succeed.
+
+*** =(guard EXP)=
+
+   This pattern ignores the object being examined and simply succeeds if
+   EXP evaluates to non-=nil= and fails otherwise. It is typically used
+   inside an =and= pattern. For example, =(and x    (guard (< x 10)))=
+   is a pattern which matches any number smaller than 10 and let-binds
+   it to the variable =x=.
+
+See Also: http://www.emacswiki.org/emacs/PatternMatching
+
+** Special Form: =catch tag body...=
+** Function: =throw tag value=
+
+Executing =throw= exits all Lisp constructs up to the matching =catch=,
+including function calls. When binding constructs such as =let= or
+function calls are exited in this way, the bindings are unbound, just as
+they are when these constructs exit normally (/note Local Variables::).
+Likewise, =throw= restores the buffer and position saved by
+=save-excursion= (/note Excursions::), and the narrowing status saved by
+=save-restriction=. It also runs any cleanups established with the
+=unwind-protect= special form when it exits that form (*note
+Cleanups::).
+
+** Function: =error format-string &rest args=
+
+   =error= works by calling =signal= with two arguments: the error symbol
+   =error=, and a list containing the string returned by =format=.
+
+** Function: =signal error-symbol data=
+
+   If the error is not handled, the two arguments are used in printing
+   the error message. Normally, this error message is provided by the
+   =error-message= property of ERROR-SYMBOL. If DATA is non-=nil=, this
+   is followed by a colon and a comma separated list of the unevaluated
+   elements of DATA. For =error=, the error message is the CAR of DATA
+   (that must be a string). Subcategories of =file-error= are handled
+   specially.
+
+   The number and significance of the objects in DATA depends on
+   ERROR-SYMBOL. For example, with a =wrong-type-argument= error, there
+   should be two objects in the list: a predicate that describes the
+   type that was expected, and the object that failed to fit that type.
+
+   Both ERROR-SYMBOL and DATA are available to any error handlers that
+   handle the error: =condition-case= binds a local variable to a list
+   of the form =(ERROR-SYMBOL .  DATA)= (*note Handling Errors::).
+
+** Function: =condition-case=
+
+If you want to be able to debug errors that are caught by a
+=condition-case=, set the variable =debug-on-signal= to a non- =nil=
+value. You can also specify that a particular handler should let the
+debugger run first, by writing =debug= among the conditions, like this:
+
+#+BEGIN_SRC elisp
+(condition-case nil
+    (delete-file filename)
+  ((debug error) nil))
+#+END_SRC
+
+The effect of =debug= here is only to prevent =condition-case= from
+suppressing the call to the debugger. Any given error will invoke the
+debugger only if =debug-on-error= and the other usual filtering
+mechanisms say it should. *Note Error Debugging::.
+
+** Macro: =condition-case-unless-debug var protected-form handlers...=
+
+   The macro =condition-case-unless-debug= provides another way to
+   handle debugging of such forms. It behaves exactly like
+   =condition-case=, unless the variable =debug-on-error= is non- =nil=,
+   in which case it does not handle any errors at all.
+
+** Function: =error-message-string error-descriptor=
+
+** Function: =define-error name message &optional parent=
+
+** Special Form: =unwind-protect body-form cleanup-forms...=
+
+* Variables
+
+** Facilities that create local bindings:
+
+ - let, let*
+ - Function calls
+ - Macro calls
+ - =condition-case=
+
+** Function: =makunbound symbol=
+
+   If SYMBOL has a dynamic local binding, =makunbound= voids the current
+   binding, and this voidness lasts only as long as the local binding is
+   in effect. Afterwards, the previously shadowed local or global
+   binding is reexposed; then the variable will no longer be void,
+   unless the reexposed binding is void too.
+
+** The difference between =defconst= and =defvar= is mainly a matter of
+   intent, serving to inform human readers of whether the value should
+   ever change. Emacs Lisp does not actually prevent you from changing
+   the value of a variable defined with =defconst=. One notable
+   difference between the two forms is that =defconst= unconditionally
+   initializes the variable, whereas =defvar= initializes it only if it
+   is originally void.
+
+** Special Form: =defvar symbol [value [doc-string]]=
+
+   If SYMBOL has a buffer-local binding in the current buffer, =defvar=
+   acts on the default value, which is buffer-independent, rather than
+   the buffer-local binding. It sets the default value if the default
+   value is void. *Note Buffer-Local Variables::.
+
+   If SYMBOL is already lexically bound (e.g., if the =defvar= form
+   occurs in a =let= form with lexical binding enabled), then =defvar=
+   sets the dynamic value. The lexical binding remains in effect until
+   its binding construct exits. *Note Variable Scoping::.
+
+** Special Form: =defconst symbol value [doc-string]=
+
+/Warning:/ If you use a =defconst= or =defvar= special form while the
+variable has a local binding (made with =let=, or a function argument),
+it sets the local binding rather than the global binding.
+
+** Function: =symbol-value symbol=
+
+   This function returns the value stored in SYMBOL's value cell. This
+   is where the variable's current *dynamic* value is stored.
+
+** When dynamic variable binding is in effect (the default), =set= has
+   the same effect as =setq=, apart from the fact that =set= evaluates
+   its SYMBOL argument whereas =setq= does not. But when a variable is
+   lexically bound, =set= affects its /dynamic/ value, whereas =setq=
+   affects its current (lexical) value. *Note Variable Scoping::.
+
+** Variable: =lexical-binding=
+
+Even when lexical binding is enabled, certain variables will continue to be
+  dynamically bound. These are called "special variables". Every variable that
+  has been defined with =defvar=, =defcustom= or =defconst= is a special
+  variable (*note Defining Variables::). All other variables are subject to
+  lexical binding.
+
+** Function: =special-variable-p symbol=
+
+** Command: =make-local-variable variable=
+
+** Macro: =setq-local variable value=
+
+Equivalent to calling =make-local-variable= followed by =setq=.
+
+** Command: =make-variable-buffer-local variable=
+
+   If VARIABLE does not have a default value, then calling this command
+   will give it a default value of =nil=. If VARIABLE already has a
+   default value, that value remains unchanged. Subsequently calling
+   =makunbound= on VARIABLE will result in a void buffer-local value and
+   leave the default value unaffected.
+
+** Macro: =defvar-local variable value &optional docstring=
+
+   This macro defines VARIABLE as a variable with initial value VALUE
+   and DOCSTRING, and marks it as automatically buffer-local. It is
+   equivalent to calling =defvar= followed by
+   =make-variable-buffer-local=. VARIABLE should be an unquoted symbol.
+
+** Function: =local-variable-p variable &optional buffer=
+
+   This returns =t= if VARIABLE is buffer-local in buffer BUFFER (which
+   defaults to the current buffer); otherwise, =nil=.
+
+** Function: =local-variable-if-set-p variable &optional buffer=
+
+   This returns =t= if VARIABLE either has a buffer-local value in
+   buffer BUFFER, or is automatically buffer-local. Otherwise, it
+   returns =nil=. If omitted or =nil=, BUFFER defaults to the current
+   buffer.
+
+** Function: =buffer-local-value variable buffer=
+
+** Function: =buffer-local-variables &optional buffer=
+
+   This function returns a list describing the buffer-local variables in
+   buffer BUFFER. (If BUFFER is omitted, the current buffer is used.)
+   Normally, each list element has the form =(SYM . VAL)=, where SYM is
+   a buffer-local variable (a symbol) and VAL is its buffer-local value.
+   But when a variable's buffer-local binding in BUFFER is void, its
+   list element is just SYM.
+
+** Command: =kill-local-variable variable=
+
+   This function deletes the buffer-local binding (if any) for VARIABLE
+   (a symbol) in the current buffer. As a result, the default binding of
+   VARIABLE becomes visible in this buffer. This typically results in a
+   change in the value of VARIABLE, since the default value is usually
+   different from the buffer-local value just eliminated.
+
+** Function: =kill-all-local-variables=
+
+   This function eliminates all the buffer-local variable bindings of
+   the current buffer except for variables have a non-=nil=
+   =permanent-local= peorperty and local hook functions that have a
+   non-=nil= =permanent-local-hook= property (*note Setting Hooks::). As
+   a result, the buffer will see the default values of most variables.
+
+   This function also resets certain other information pertaining to the
+   buffer: it sets the local keymap to =nil=, the syntax table to the
+   value of =(standard-syntax-table)=, the case table to
+   =(standard-case-table)=, and the abbrev table to the value of
+   =fundamental-mode-abbrev-table=.
+
+   The very first thing this function does is run the normal hook
+   =change-major-mode-hook= (see below).
+
+** Function: =default-value symbol=
+
+   This function returns SYMBOL's default value. This is the value that is seen
+   in buffers and frames that do not have their own values for this variable. If
+   SYMBOL is not buffer-local, this is equivalent to =symbol-value= .
+
+** Function: =default-boundp symbol=
+
+   The function =default-boundp= tells you whether
+   SYMBOL's default  value is nonvoid.  If =(default-boundp 'foo)=
+   returns =nil=, then =(default-value 'foo)= would get an error.
+
+** Special Form: =setq-default [symbol form]...=
+
+   If a SYMBOL is not buffer-local for the current buffer, and is not
+   marked automatically buffer-local, =setq-default= has the same effect
+   as =setq=. If SYMBOL is buffer-local for the current buffer, then
+   this changes the value that other buffers will see (as long as they
+   don't have a buffer-local value), but not the value that the current
+   buffer sees.
+
+** File local variables
+
+*** Specify file variables
+There are two ways to specify file local variable values: in the first
+line, or with a local variables list.  Here's how to specify them in the
+first line:
+
+:     -*- mode: MODENAME; VAR: VALUE; ... -*-
+
+   In shell scripts, the first line is used to identify the script
+interpreter, so you cannot put any local variables there.  To
+accommodate this, Emacs looks for local variable specifications in the
+second line if the first line specifies an interpreter.
+
+   Apart from using a ~-*-~ line, you can define file local variables
+using a "local variables list" near the end of the file.  The start of
+the local variables list should be no more than 3000 characters from
+the end of the file, and must be on the last page if the file is
+divided into pages.
+
+   If a file has both a local variables list and a ~-*-~ line, Emacs
+processes _everything_ in the ~-*-~ line first, and _everything_ in the
+local variables list afterward.  The exception to this is a major mode
+specification.  Emacs applies this first, wherever it appears, since
+most major modes kill all local variables as part of their
+initialization.
+
+   A local variables list starts with a line containing the string
+~Local Variables:~, and ends with a line containing the string ~End:~.
+In between come the variable names and values, one set per line, like
+this:
+
+#+BEGIN_EXAMPLE
+/* Local Variables:  */
+/* mode: c           */
+/* comment-column: 0 */
+/* End:              */
+#+END_EXAMPLE
+
+*** Per-directory local variables
+Sometimes, you may wish to define the same set of local variables to
+all the files in a certain directory and its subdirectories, such as
+the directory tree of a large software project.  This can be
+accomplished with "directory-local variables".
+
+   The usual way to define directory-local variables is to put a file named
+~.dir-locals.el~ in a directory. Whenever Emacs visits any file in that
+directory or any of its subdirectories, it will apply the directory-local
+variables specified in ~.dir-locals.el~, as though they had been defined as
+file-local variables for that file . Emacs searches for ~.dir-locals.el~
+starting in the directory of the visited file, and moving up the directory tree.
+To avoid slowdown, this search is skipped for remote files. If needed, the
+search can be extended for remote files by setting the variable
+~enable-remote-dir-locals~ to ~t~.
+
+   The ~.dir-locals.el~ file should hold a specially-constructed list, which
+maps major mode names (symbols) to alists . Each alist entry consists of a
+variable name and the directory-local value to assign to that variable, when the
+specified major mode is enabled. Instead of a mode name, you can specify ~nil~,
+which means that the alist applies to any mode; or you can specify a
+subdirectory name (a string), in which case the alist applies to all files in
+that subdirectory.
+
+   Here's an example of a ~.dir-locals.el~ file:
+
+  #+BEGIN_SRC elisp
+  ((nil . ((indent-tabs-mode . t)
+          (fill-column . 80)))
+  (c-mode . ((c-file-style . "BSD")
+              (subdirs . nil)))
+  ("src/imported"
+    . ((nil . ((change-log-default-name
+                . "ChangeLog.local"))))))
+  #+END_SRC
+
+This sets ~indent-tabs-mode~ and ~fill-column~ for any file in the
+directory tree, and the indentation style for any C source file.  The
+special ~subdirs~ element is not a variable, but a special keyword
+which indicates that the C mode settings are only to be applied in the
+current directory, not in any subdirectories.  Finally, it specifies a
+different ~ChangeLog~ file name for any file in the ~src/imported~
+subdirectory.
+
+   Instead of editing the ~.dir-locals.el~ file by hand, you can use
+the command ~M-x add-dir-local-variable~.  This prompts for a mode or
+subdirectory name, and for variable and value, and adds the entry
+defining the directory-local variable.  ~M-x delete-dir-local-variable~
+deletes an entry.  ~M-x copy-file-locals-to-dir-locals~ copies the
+file-local variables in the current file into ~.dir-locals.el~.
+
+   Another method of specifying directory-local variables is to define a group
+of variables/value pairs in a "directory class", using the
+~dir-locals-set-class-variables~ function; then, tell Emacs which directories
+correspond to the class by using the ~dir-locals-set-directory-class~ function.
+These function calls normally go in your initialization file. This method is
+useful when you can't put ~.dir-locals.el~ in a directory for some reason. For
+example, you could apply settings to an unwritable directory this way:
+
+#+BEGIN_SRC elisp
+(dir-locals-set-class-variables 'unwritable-directory
+  '((nil . ((some-useful-setting . value)))))
+
+(dir-locals-set-directory-class
+  "/usr/include/" 'unwritable-directory)
+#+END_SRC
+
+If a variable has both a directory-local and file-local value
+specified, the file-local value takes effect.  Unsafe directory-local
+variables are handled in the same way as unsafe file-local variables.
+
+** Variable Aliases
+
+*** Function: ~defvaralias new-alias base-variable &optional docstring~
+
+This function defines the symbol NEW-ALIAS as a variable alias for
+symbol BASE-VARIABLE. This means that retrieving the value of
+NEW-ALIAS returns the value of BASE-VARIABLE, and changing the
+value of NEW-ALIAS changes the value of BASE-VARIABLE.  The two
+aliased variable names always share the same value and the same
+bindings.
+
+*** Function: ~make-obsolete-variable obsolete-name current-name when &optional access-type~
+
+This function makes the byte compiler warn that the variable
+OBSOLETE-NAME is obsolete.  If CURRENT-NAME is a symbol, it is the
+variable's new name; then the warning message says to use
+CURRENT-NAME instead of OBSOLETE-NAME.  If CURRENT-NAME is a
+string, this is the message and there is no replacement variable.
+WHEN should be a string indicating when the variable was first
+made obsolete (usually a version number string).
+
+The optional argument ACCESS-TYPE, if non- ~nil~, should should
+specify the kind of access that will trigger obsolescence
+warnings; it can be either ~get~ or ~set~.
+
+*** Macro: ~define-obsolete-variable-alias obsolete-name current-name &optional when docstring~
+
+This macro marks the variable OBSOLETE-NAME as obsolete and also
+makes it an alias for the variable CURRENT-NAME.  It is equivalent
+to the following:
+
+#+BEGIN_SRC elisp
+(defvaralias OBSOLETE-NAME CURRENT-NAME DOCSTRING)
+(make-obsolete-variable OBSOLETE-NAME CURRENT-NAME WHEN)
+#+END_SRC
+
+*** Function: ~indirect-variable variable~
+
+This function returns the variable at the end of the chain of
+aliases of VARIABLE.  If VARIABLE is not a symbol, or if VARIABLE
+is not defined as an alias, the function returns VARIABLE.
+
+** Generalized Varibales
+
+*** Use the ~setf~ macro
+The ~setf~ macro is the most basic way to operate on generalized
+variables.  The ~setf~ form is like ~setq~, except that it accepts
+arbitrary place forms on the left side rather than just symbols.  For
+example, ~(setf (car a) b)~ sets the car of ~a~ to ~b~, doing the same
+operation as ~(setcar a b)~, but without having to remember two
+separate functions for setting and accessing every type of place.
+
+Macro: ~setf [place form]...~
+
+  This macro evaluates FORM and stores it in PLACE, which must be a
+  valid generalized variable form.  If there are several PLACE and
+  FORM pairs, the assignments are done sequentially just as with
+  ~setq~.  ~setf~ returns the value of the last FORM.
+
+The following Lisp forms will work as generalized variables, and so
+may appear in the PLACE argument of ~setf~:
+
+   + A symbol naming a variable.  In other words, ~(setf x y)~ is
+     exactly equivalent to ~(setq x y)~
+   + A call to any of the following standard Lisp functions:
+      | aref | cddr    | symbol-function |
+      | car  | elt     | symbol-plist    |
+      | caar | get     | symbol-value    |
+      | cadr | gethash |                 |
+      | cdr  | nth     |                 |
+      | cdar | nthcdr  |                 |
+   + A call to any of the following Emacs-specific functions:
+      | default-value      | process-get          |
+      | frame-parameter    | process-sentinel     |
+      | terminal-parameter | window-buffer        |
+      | keymap-parent      | window-display-table |
+      | match-data         | window-dedicated-p   |
+      | overlay-get        | window-hscroll       |
+      | overlay-start      | window-parameter     |
+      | overlay-end        | window-point         |
+      | process-buffer     | window-start         |
+      | process-filter     |                      |
+
+~setf~ signals an error if you pass a PLACE form that it does not know
+how to handle.
+
+   The macros ~push~ (*note List Variables::) and ~pop~ can manipulate
+   generalized variables, not just lists.
+
+*** Defining new ~setf~ forms
+**** Macro: ~gv-define-simple-setter name setter &optional fix-return~
+
+This macro enables you to easily define ~setf~ methods for simple
+cases.  NAME is the name of a function, macro, or special form.
+You can use this macro whenever NAME has a directly corresponding
+SETTER function that updates it, e.g., ~(gv-define-simple-setter
+car setcar)~.
+
+This macro translates a call of the form
+
+:          (setf (NAME ARGS...) VALUE)
+
+into
+:          (SETTER ARGS... VALUE)
+
+Such a ~setf~ call is documented to return VALUE.  This is no
+problem with, e.g., ~car~ and ~setcar~, because ~setcar~ returns
+the value that it set.  If your SETTER function does not return
+VALUE, use a non-~nil~ value for the FIX-RETURN argument of
+~gv-define-simple-setter~.  This expands into something equivalent
+to
+
+#+BEGIN_SRC elisp
+(let ((temp VALUE))
+  (SETTER ARGS... temp)
+  temp)
+#+END_SRC
+
+so ensuring that it returns the correct result.
+
+**** Macro: ~gv-define-setter name arglist &rest body~
+
+This macro allows for more complex ~setf~ expansions than the
+previous form.  You may need to use this form, for example, if
+there is no simple setter function to call, or if there is one but
+it requires different arguments to the place form.
+
+This macro expands the form ~(setf (NAME ARGS...) VALUE)~ by first
+binding the ~setf~ argument forms ~(VALUE ARGS...)~ according to
+ARGLIST, and then executing BODY.  BODY should return a Lisp form
+that does the assignment, and finally returns the value that was
+set.  An example of using this macro is:
+
+:          (gv-define-setter caar (val x) `(setcar (car ,x) ,val))
+* Functions
+** Important terms for functions and function-like objects:
+ + =lambda expression=
+ + =primitive=
+   A function which is callable from Lisp but is actually written in
+   C.  Primitives are also called "built-in functions", or "subrs".
+ + =special form=
+   A primitive that is like a function but does not evaluate all of
+   its arguments in the usual way.
+ + =macro=
+ + =command=
+ + =closure=
+ + =byte-code function=
+ + =autoload object=
+** ~defalias name definition &optional doc~
+ This function defines the symbol NAME as a function, with definition DEFINITION.
+** Difference between ~apply~ and ~funcall~
+ The last argument of apply is a list of objects, which are passed to FUNCTION
+ as separate arguments, rather than a single list. We say that =apply= "spreads"
+ this list so that each individual element becomes an argument.
+** ~apply-partially func &rest args~
+ This function returns a new function which, when called, will call
+ FUNC with the list of arguments composed from ARGS and additional
+ arguments specified at the time of the call.  If FUNC accepts N
+ arguments, then a call to ~apply-partially~ with ~M < N~ arguments
+ will produce a new function of ~N - M~ arguments.
+
+ Here's how we could define the built-in function ~1+~, if it
+ didn~t exist, using ~apply-partially~ and ~+~, another built-in
+ function:
+
+ #+BEGIN_SRC elisp
+ (defalias '1+ (apply-partially '+ 1)
+   "Increment argument by one.")
+ (1+ 10)
+       => 11
+ #+END_SRC
+** ~identity arg~
+ This function returns ARG and has no side effects.
+
+** ~ignore &rest args~
+ This function ignores any arguments and returns `nil'.
+
+** Mapping functions
+
+*** ~mapcar function sequence~
+ ~mapcar~ applies FUNCTION to each element of SEQUENCE in turn, and
+ returns a list of the results.
+
+*** ~mapc function sequence~
+~mapc~ is like ~mapcar~ except that FUNCTION is used for
+side-effects only--the values it returns are ignored, not collected
+into a list.  ~mapc~ always returns SEQUENCE.
+
+*** ~mapconcat function sequence separator~
+
+** ~function function-object~
+ This special form returns FUNCTION-OBJECT without evaluating it.
+ In this, it is similar to ~quote~ (*note Quoting::).  But unlike
+ ~quote~, it also serves as a note to the Emacs evaluator and
+ byte-compiler that FUNCTION-OBJECT is intended to be used as a
+ function.  Assuming FUNCTION-OBJECT is a valid lambda expression,
+ this has two effects:
+
+ + When the code is byte-compiled, FUNCTION-OBJECT is compiled
+   into a byte-code function object (*note Byte Compilation::).
+ + When lexical binding is enabled, FUNCTION-OBJECT is converted
+   into a closure.  *Note Closures::.
+
+ The read syntax ~#'~ is a short-hand for using ~function~.  The
+ following forms are all equivalent:
+
+ #+BEGIN_SRC elisp
+ (lambda (x) (* x x))
+ (function (lambda (x) (* x x)))
+ #'(lambda (x) (* x x))
+ #+END_SRC
+
+** Accessing Function Cell Contents
+ + ~symbol-function symbol~
+ + ~fboundp symbol~
+ + ~fmakunbound symbol~
+ + ~fset symbol definition~
+
+** Advices
+
+*** Primitives to manipulate advices
+
+**** ~add-function where place function &optional props~
+Every function added with ~add-function~ can be accompanied by an
+association list of properties PROPS.  Currently only two of those
+properties have a special meaning:
+
++ ~name~
+    This gives a name to the advice, which ~remove-function~ can
+    use to identify which function to remove.  Typically used
+    when FUNCTION is an anonymous function.
++ ~depth~
+    This specifies how to order the advices, in case several
+    advices are present.  By default, the depth is 0.  A depth of
+    100 indicates that this advice should be kept as deep as
+    possible, whereas a depth of -100 indicates that it should
+    stay as the outermost advice.  When two advices specify the
+    same depth, the most recently added advice will be outermost.
+    For a ~:before~ advice, being outermost means that this
+    advice will be run first, before any other advice, whereas
+    being innermost means that it will run right before the
+    original function, with no other advice run between itself and
+    the original function.  Similarly, for an ~:after~ advice
+    innermost means that it will run right after the original
+    function, with no other advice run in between, whereas
+    outermost means that it will be run very last after all other
+    advices.  An innermost ~:override~ advice will only override
+    the original function and other advices will apply to it,
+    whereas an outermost ~:override~ advice will override not
+    only the original function but all other advices applied to
+    it as well.
+
+**** Macro: ~remove-function place function~
+
+**** ~advice-function-member-p advice function-def~
+
+**** ~advice-function-mapc f function-def~
+Call the function F for every advice that was added to FUNCTION-DEF. F is called
+with two arguments: the advice function and its properties.
+
+*** Advising Named Functions
+**** ~advice-add symbol where function &optional props~
+Add the advice FUNCTION to the named function SYMBOL.  WHERE and
+PROPS have the same meaning as for ~add-function~.
+
+**** ~advice-remove symbol function~
+Remove the advice FUNCTION from the named function SYMBOL.
+FUNCTION can also be the ~name~ of an advice.
+
+**** ~advice-member-p function symbol~
+Return non-~nil~ if the advice FUNCTION is already in the named
+function SYMBOL.  FUNCTION can also be the ~name~ of an advice.
+
+**** ~advice-mapc function symbol~
+Call FUNCTION for every advice that was added to the named function
+SYMBOL.  FUNCTION is called with two arguments: the advice function
+and its properties.
+
+*** Advice combinators
+Here are the different possible values for the WHERE argument of
+~add-function~ and ~advice-add~, specifying how the advice FUNCTION and
+the original function should be composed.
+
++ ~:before~
++ ~:after~
++ ~:override~
++ ~:around~
++ ~:before-while~
++ ~:before-until~
++ ~:after-while~
++ ~:after-until~
++ ~:filter-args~
+  Call FUNCTION first and use the result (which should be a list) as
+  the new arguments to pass to the old function.
++ ~:filter-return~
+  Call the old function first and pass the result to FUNCTION.
+
+** Declaring Functions Obsolete
+
+*** ~make-obsolete obsolete-name current-name &optional when~
+This function marks OBSOLETE-NAME as obsolete.  OBSOLETE-NAME
+should be a symbol naming a function or macro, or an alias for a
+function or macro.
+
+*** ~define-obsolete-function-alias obsolete-name current-name &optional when doc~
+This convenience macro marks the function OBSOLETE-NAME obsolete
+and also defines it as an alias for the function CURRENT-NAME.  It
+is equivalent to the following:
+#+BEGIN_SRC elisp
+(defalias OBSOLETE-NAME CURRENT-NAME DOC)
+(make-obsolete OBSOLETE-NAME CURRENT-NAME WHEN)
+#+END_SRC
+
+*** ~set-advertised-calling-convention function signature when~
+This function specifies the argument list SIGNATURE as the correct
+way to call FUNCTION.  This causes the Emacs byte compiler to
+issue a warning whenever it comes across an Emacs Lisp program
+that calls FUNCTION any other way (however, it will still allow
+the code to be byte compiled).  WHEN should be a string indicating
+when the variable was first made obsolete (usually a version
+number string).
+
+For instance, in old versions of Emacs the ~sit-for~ function
+accepted three arguments, like this
+
+:            (sit-for seconds milliseconds nodisp)
+
+However, calling ~sit-for~ this way is considered obsolete . The old calling
+convention is deprecated like this:
+#+BEGIN_SRC elisp
+(set-advertised-calling-convention
+  'sit-for '(seconds &optional nodisp) "22.1")
+#+END_SRC
+
+
+** Inline Functions
+An "inline function" is a function that works just like an ordinary
+function, except for one thing: when you byte-compile a call to the
+function (*note Byte Compilation::), the function's definition is
+expanded into the caller.  To define an inline function, use ~defsubst~
+instead of ~defun~.
+
+*** ~defsubst name args [doc] [declare] [interactive] body...~
+This macro defines an inline function.  Its syntax is exactly the
+same as ~defun~.
+
+** The ~declare~ Form
+~declare~ is a special macro which can be used to add "meta" properties
+to a function or macro: for example, marking it as obsolete, or giving
+its forms a special <TAB> indentation convention in Emacs Lisp mode.
+
+*** Macro: declare specs...
+This macro ignores its arguments and evaluates to ~nil~; it has no run-time
+effect. However, when a ~declare~ form occurs in the DECLARE argument of a
+~defun~ or ~defsubst~ function definition or a ~defmacro~ macro definition
+, it appends the properties specified by SPECS to the function or macro.
+This work is specially performed by ~defun~, ~defsubst~, and ~defmacro~.
+
+Each element in SPECS should have the form ~(PROPERTY ARGS...)~,
+which should not be quoted.  These have the following effects:
+
++ ~(advertised-calling-convention SIGNATURE WHEN)~
+  This acts like a call to ~set-advertised-calling-convention~ ; SIGNATURE
+  specifies the correct argument list for calling the function or macro, and
+  WHEN should be a string indicating when the old argument list was first made
+  obsolete.
+
++ ~(debug EDEBUG-FORM-SPEC)~
+  This is valid for macros only.  When stepping through the
+  macro with Edebug, use EDEBUG-FORM-SPEC.  *Note Instrumenting
+  Macro Calls::.
++ ~(doc-string N)~
+  This is used when defining a function or macro which itself
+  will be used to define entities like functions, macros, or
+  variables.  It indicates that the Nth argument, if any,
+  should be considered as a documentation string.
++ ~(indent INDENT-SPEC)~
+  Indent calls to this function or macro according to
+  INDENT-SPEC.  This is typically used for macros, though it
+  works for functions too.
++ ~(obsolete CURRENT-NAME WHEN)~
+  Mark the function or macro as obsolete, similar to a call to
+  ~make-obsolete~ . CURRENT-NAME should be a symbol (in which case the warning
+  message says to use that instead), a string (specifying the warning message),
+  or ~nil~ (in which case the warning message gives no extra details). WHEN
+  should be a string indicating when the function or macro was first made
+  obsolete.
++ ~(compiler-macro EXPANDER)~
+  This can only be used for functions, and tells the compiler
+  to use EXPANDER as an optimization function.  When
+  encountering a call to the function, of the form ~(FUNCTION
+  ARGS...)~, the macro expander will call EXPANDER with that
+  form as well as with ARGS..., and EXPANDER can either return
+  a new expression to use instead of the function call, or it
+  can return just the form unchanged, to indicate that the
+  function call should be left alone.  EXPANDER can be a
+  symbol, or it can be a form ~(lambda (ARG) BODY)~ in which
+  case ARG will hold the original function call expression, and
+  the (unevaluated) arguments to the function can be accessed
+  using the function~s formal arguments.
++ ~(gv-expander EXPANDER)~
+  Declare EXPANDER to be the function to handle calls to the
+  macro (or function) as a generalized variable, similarly to
+   ~gv-define-expander~.  EXPANDER can be a symbol or it can be
+  of the form ~(lambda (ARG) BODY)~ in which case that function
+  will additionally have access to the macro (or function)~s
+  arguments.
++ ~(gv-setter SETTER)~
+  Declare SETTER to be the function to handle calls to the macro (or function)
+  as a generalized variable. SETTER can be a symbol in which case it will be
+  passed to ~gv-define-simple-setter~, or it can be of the form ~(lambda (ARG)
+  BODY)~ in which case that function will additionally have access to the macro
+  (or function)~s arguments and it will passed to ~gv-define-setter~.
+
+** Telling the Compiler that a Function is Defined
+ Macro: ~declare-function function file &optional arglist fileonly~
+ Tell the byte compiler to assume that FUNCTION is defined, with
+ arguments ARGLIST, and that the definition should come from the
+ file FILE.  FILEONLY non-`nil' means only check that FILE exists,
+ not that it actually defines FUNCTION.
+* Macros
+**

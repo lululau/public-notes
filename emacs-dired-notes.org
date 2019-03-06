@@ -1,0 +1,93 @@
+#+TITLE: Emacs Dired Notes
+#+AUTHOR: Liu Xiang
+
+* 使用 Dired 完成 find and rename
+
+** 使用 find-name-dired (find-grep-dired)
+   
+   1. ~SPC D F~ ==> ~find-name-dired~
+   2. Input file name pattern.
+   3. ~SPC b w~
+   4. Replace filename use iedit or ~% R~, ~% C~
+
+** 直接在 dired buffer 中展开目录树
+   
+   1. ~C-u s~
+   2. Input ~ls -alR~
+   3. ~SPC b w~
+   4. Replace filename use iedit or ~% R~, ~% C~
+
+* Deleting Files
+  
+  + ~d~ Flag file for deletion.
+  + ~u~ Remove deletion flag.
+  + ~x~ Delete files flagged for deletion.
+  + ~% d~ Flag files for deletion by using REGEXP
+
+* Marks
+  
+  + ~m~ Mark file.
+  + ~* *~ Mark all executable files.
+  + ~* @~ Mark all symbolic links.
+  + ~* /~ mark all directories.
+  + ~* s~ Mark all the files in the current subdirectory, aside from ‘.’ and ‘..’.
+  + ~u~ Remove marks on active lines.
+  + ~U~ Remove all marks.
+  + ~M-{~ \ ~M-}~ Move between marked lines.
+  + ~% m~ Mark files by using REGEXP.
+  + ~C-/~ Undo.
+
+* Operation on Files
+
+  + ~C~ Copy file.
+  + ~D~ Delete file.
+  + ~R~ Rename file.
+  + ~S~ Make symbolic link.
+  + ~M~ Change file permissions.
+  + ~O~ chown
+  + ~G~ chgrp
+  + ~Z~ compress / decompress file
+  + ~c~ compress file by using ~dired-compress-files-alist~
+  + ~A~ grep marked files.
+  + ~Q~ replace marked files.
+
+* Execute Shell Commands
+
+  + ~!~
+  + ~&~ 异步
+  + ~! my_cmd *~ ==> ~my_cmd file1 file2 file3 ...~
+  + ~! my_cmd ?~ ==> ~my_cmd file1~ then ~my_cmd file2~ and then ~my_cmd file3~
+
+* Transforming File Names
+  
+  + ~% u~ Rename marked files to upper case.
+  + ~% l~ Rename marked files to lower case.
+  + ~% R~ Rename file by using REGEXP.
+  + ~% C~ Copy file by using REGEXP.
+  + ~% S~ Make symbolic links by using REGEXP.
+
+* Subdirectories
+
+  + ~i~ Insert sub-directory entry.
+  + ~C-u i~ Insert sub-directory entry with specifying ~ls~ options.
+  + ~C-u K~ Remove sub-directory entry from buffer.
+  + ~C-x ]~ / ~C-M-n~ Next sub-directory entry.
+  + ~C-x [~ / ~C-M-p~ Previous sub-directory entry.
+  + ~$~ Hide sub-directory entry.
+  + ~M-$~ Hide all sub-directory entries.
+  + ~r~ Redisplay dired buffer.
+  + ~SPC b R~ Revert dired buffer.
+  + ~s~ Toggle between alphabetical order and date/time order.
+  + ~C-u s~ Redisplay dired buffer using SWITCHES.
+
+* Find
+
+  + ~SPC D D~ ==> ~find-dired~
+  + ~SPC D F~ ==> ~find-name-dired~
+  + ~SPC D G~ ==> ~find-grep-dired~
+
+* Misc
+
+  + ~+~ New directory.
+  + ~w~ Copy filenames of marked files.
+  + ~(~ Hide detail file info.
