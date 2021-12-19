@@ -1,5 +1,5 @@
 * Collections
-  ** Enumerable
+** Enumerable
 *** all?
 **** Java
     #+BEGIN_SRC java
