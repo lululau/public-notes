@@ -1,0 +1,1329 @@
+* Collections
+  ** Enumerable
+*** all?
+**** Java
+    #+BEGIN_SRC java
+      Stream.of(1, 2, 3, 4, 5).allMatch(x -> x < 10);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       all(x < 10 for x in [1, 2, 3, 4, 5])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let y = x.iter().all(|e| *e < 10);
+     #+END_SRC
+*** any?
+    #+BEGIN_SRC java
+      Stream.of(1, 2, 3, 4, 5).anyMatch(x -> x < 10);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       any(x < 10 for x in [1, 2, 3, 4, 5])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let y = x.iter().any(|e| *e < 10);
+     #+END_SRC
+*** collect / map
+**** Java
+    #+BEGIN_SRC java
+      Stream.of(1, 2, 3, 4).map(x -> x * 2);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       [e * 2 for e in [1, 2, 3, 4]]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let y: Vec<i32> = x.iter().map(|x| x * 2).collect();
+     #+END_SRC
+*** flat_map
+**** Java
+    #+BEGIN_SRC java
+      List a = Arrays.asList(1, 2, 3, 4);
+      List b = Arrays.asList(3, 4, 5, 6);
+      List result = Stream.of(a, b).flatMap(e -> e.stream()).collect(Collectors.toList());
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       x = [[1, 2, 3], [4, 5, 6]]
+
+       [e for i in x for e in i]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![
+           vec![1, 2, 3],
+           vec![4, 5, 6]
+       ];
+       let y: Vec<&i32> = x.iter().flat_map(|e| e ).collect();
+     #+END_SRC
+*** count
+**** Java
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).filter(e -> e % 2 == 0).count()
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       sum(1 for e in [1, 2, 3, 4] if e < 3)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let y = x.iter().filter(|e| **e < 3).count();
+     #+END_SRC
+*** find
+**** Java
+    #+BEGIN_SRC java
+      Integer i = Stream.of(1, 2, 3, 4).filter(x -> x > 2).findFirst();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+        next((e for e in [1, 2, 3, 4, 5, 6] if e > 3), None)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let y = x.iter().find(|e| **e > 3);
+     #+END_SRC
+*** each_with_index
+**** Java
+    
+    #+BEGIN_SRC java
+      // Java 没有对应的现成方法
+      // Method A:
+      String[] names = {"Sam", "Pamela", "Dave", "Pascal", "Erik"};
+      IntStream.range(0, names.length)
+          .filter(i -> names[i].length() <= i)
+          .mapToObj(i -> names[i])
+          .collect(Collectors.toList());
+
+      // Method B:
+      String[] names = {"Sam", "Pamela", "Dave", "Pascal", "Erik"};
+      AtomicInteger index = new AtomicInteger();
+      List<String> list = Arrays.stream(names)
+          .filter(n -> n.length() <= index.incrementAndGet())
+          .collect(Collectors.toList());
+
+      // Method C:
+      // Guava since version 21
+      Streams.mapWithIndex(Stream.of("a", "b", "c"),
+                           (str, index) -> str + ":" + index) // will return Stream.of("a:0", "b:1", "c:2")
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       for i, v in enumerate(a):
+          print "{} : {}".format(i, v)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       x.iter().enumerate().for_each(|(idx, e)| {
+           println!("Index: {}, Value: {}", idx, e);
+       });
+     #+END_SRC
+*** each_with_object
+**** Java
+    
+    #+BEGIN_SRC ruby
+      h = {a: 1, b: 2, c: 3}
+      result = h.each_with_object({}) { |(k, v), hash| hash[k] = v }
+    #+END_SRC
+     
+    #+BEGIN_SRC java
+      Map<String, Integer> h = ImmutableMap.of("a", 1, "b", 2, "c", 3);
+      Map<String, Integer> result = h.entrySets().stream().reduce(new HashMap<String, Integer>(), (hash, es) -> {
+              hash.put(es.getKey(), es.getValue() * 2);
+              return hash;
+          }, (h1, h2) -> {
+              h1.putAll(h2);
+              return h1;
+          });
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       def create_url_table(urls):
+         return {url: get_title(url) for url in urls if 'google' not in url}
+     #+END_SRC
+**** Rust
+
+     无
+*** entries
+**** Java
+    : Map#entrySet()
+**** Python
+     #+BEGIN_SRC python
+       d.items()  # Or: list(d.items())
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x: HashMap<String, i32> = HashMap::new();
+       let entries: Vec<_> = x.iter().collect_vec();
+     #+END_SRC
+*** find_all / select
+**** Java
+    : Stream#filter()
+**** Python
+     #+BEGIN_SRC python
+       [e for e in [1, 2, 3, 4] if e > 2]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let x = x.iter().filter(|e| **e > 2).collect_vec();
+     #+END_SRC
+*** group_by
+**** Java
+    #+BEGIN_SRC java
+      Map<Boolean, List<Integer>> map = IntStream.range(1, 11).boxed().collect(groupingBy(x -> x % 2 == 0));
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       from itertools import groupby
+       
+       x = [{"name": "Jack", "gender": "M"}, {"name": "Lucy", "gender": "F"}, {"name": "David", "gender": "M"}]
+       
+       h = {k: list(v) for k, v in  groupby(sorted(x, key=lambda e: e["gender"])) }
+       
+       # Out[153]: 
+       # {'F': [{'name': 'Lucy', 'gender': 'F'}],
+       #  'M': [{'name': 'Jack', 'gender': 'M'}, {'name': 'David', 'gender': 'M'}]}
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use itertools::Itertools;
+
+       // group data into runs of larger than zero or not.
+       let data = vec![1, 3, -2, -2, 1, 0, 1, 2];
+       // groups:     |---->|------>|--------->|
+
+       for (key, group) in data.into_iter().group_by(|elt| *elt >= 0) {
+           // Check that the sum of each group is +/- 4.
+           assert_eq!(4, group.iter().fold(0_i32, |a, b| a + b).abs());
+       }
+     #+END_SRC
+*** inject / reduce
+**** Java 
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).boxed().reduce(Integer::sum);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       reduce(function, iterable[, initializer])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let s1 = x.iter().fold(0, |s, e| s + *e);
+     #+END_SRC
+*** map
+**** Java
+    #+BEGIN_SRC java
+      Stream map = IntStream.range(1, 11).boxed().map(x -> x * 2);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       [e * 2 for e in [1, 2, 3, 4, 5]]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let s = x.iter().map(|x| *x + 2).collect_vec();
+     #+END_SRC
+*** max / max_by
+**** Java
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).max();
+      IntStream.range(1, 11).boxed().max(Comparators.comparable());
+      IntStream.range(1, 11).boxed().max(Comparator.comparing(x -> -x));
+      IntStream.range(1, 11).boxed().collect(maxBy(Comparator.comparing(x -> x)));
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       max(e for e in [1, 2, 3, 4])
+       max((e for e in [1, 2, 3, 4]), key=lambda e: -e)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let m = x.iter().max();
+       let m2 = x.iter().max_by_key(|e| -(**e) );
+       let m3 = x.iter().max_by(|a, b| (*b).cmp(*a));
+     #+END_SRC
+*** partition
+**** Java
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).boxed().collect(partitioningBy(x -> x > 5))
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       def partition(pred, iterable):
+           t1, t2 = itertools.tee(iterable)
+           return itertools.filterfalse(pred, t1), itertools.filter(pred, t2)
+     #+END_SRC
+     
+**** Rust
+
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       let (x, y): (Vec<i32>, Vec<i32>) = x.iter().partition(|e| **e > 2);
+     #+END_SRC
+*** reverse_each
+**** Java
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).boxed().sorted(Collections.reverseOrder()).forEach(System.out::println);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       for i in reversed([1, 2, 3, 4]):
+           print(i)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![1, 2, 3, 4];
+       x.iter().rev().for_each(|e| println!("{}", e));
+     #+END_SRC
+*** sort
+**** Java
+    #+BEGIN_SRC java
+      List l = Arrays.asList(4, 3, 2, 1);
+      l.sort(Comparator.naturalOrder());
+      Collections.sort(l);
+      System.out.println(l);
+      l.stream().sorted();
+      l.stream().sorted(Comparators.comparable());
+      l.stream().sorted(Comparator.naturalOrder());
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       sorted([3, 1, 4, 2])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![2, 3, 1, 4];
+       let x = x.iter().sorted().collect_vec();
+     #+END_SRC
+*** sort_by
+**** Java 
+    #+BEGIN_SRC java
+      people.stream().sorted(Comparator.comparing(x -> x.getAge()))
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       from operator import itemgetter
+       h = [{"name": "Jack", "age": 20}, {"name": "David", "age": 30}, {"name": "Lucy", "age": 10}]
+       sorted(h, key=itemgetter("age"))
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let x = vec![
+           Person { name: String::from("Jack"), age: 20 },
+           Person { name: String::from("David"), age: 10 },
+           Person { name: String::from("Lucy"), age: 30 },
+       ];
+
+       let x = x.iter().sorted_by_key(|p| &p.name).collect_vec();
+     #+END_SRC
+*** sum
+**** Java
+    #+BEGIN_SRC java
+      IntStream.range(1, 11).sum();
+      Stream.of(1, 2, 3, 4).mapToInt(Integer::intValue).summaryStatistics().getSum();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       sum([1, 2, 3, 4])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let y = vec![2, 3, 4, 5];
+       let y = y.iter().sum();
+     #+END_SRC
+*** uniq
+**** Java
+    #+BEGIN_SRC java
+      Stream.of(1, 2, 3, 1, 2, 3).distinct().forEach(System.out::println);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       list(set([1, 2, 3, 4, 1, 2]))
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let y = vec![2, 3, 4, 5];
+       let y = y.iter().unique().collect_vec();
+     #+END_SRC
+*** zip
+**** Java
+    Guava:
+
+    #+BEGIN_SRC java
+      Streams.zip(
+                  Stream.of("foo1", "foo2", "foo3"),
+                  Stream.of("bar1", "bar2"),
+                  (arg1, arg2) -> arg1 + ":" + arg2);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       x = [1, 2, 3]
+       y = [4, 5, 6]
+       zipped = zip(x, y)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let a1 = [1, 2, 3];
+       let a2 = [4, 5, 6];
+       let mut iter = a1.iter().zip(a2.iter());
+     #+END_SRC
+
+** Array
+*** &
+**** Java
+    commons-collections =ListUtils= :
+
+    #+BEGIN_SRC java
+      public static List intersection(List list1, List list2)
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       a = [1,2,3,4,5]
+       b = [1,3,5,6]
+       list(set(a) & set(b))
+
+       [x for x in a if x in b]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use std::collections::HashSet;
+
+       let a: HashSet<u32> = vec![1, 2, 3].into_iter().collect();
+       let b: HashSet<_> = [4, 2, 3, 4].iter().cloned().collect();
+
+       let mut intersection = a.intersection(&b);
+     #+END_SRC
+*** |
+**** Java
+    commons-collection =ListUtils#union()=
+     
+    Returns a new list containing the second list appended to the first list.
+     
+    Result may be not unique.
+**** Python
+     #+BEGIN_SRC python
+       a = ['Orange and Banana', 'Orange Banana']
+       b = ['Grapes', 'Orange Banana']
+       c = ['Foobanana', 'Orange and Banana']
+       list(set().union(a,b,c))
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use std::collections::HashSet;
+
+       let a: HashSet<u32> = vec![1, 2, 3].into_iter().collect();
+       let b: HashSet<_> = [4, 2, 3, 4].iter().cloned().collect();
+
+       let mut union_iter = a.union(&b);
+     #+END_SRC
+*** +
+**** Java
+    #+BEGIN_SRC java
+      Stream.concat(stream1, stream2);
+      List#addAll();
+      ListUtils.union(l1, l2);
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       [1, 2] + [3, 4]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let y = vec![2, 3, 4, 5];
+       let y = y.iter().chain(y.iter()).collect_vec();
+     #+END_SRC
+*** -
+**** Java
+    #+BEGIN_SRC java
+      boolean result = List#removeAll();
+      List result = ListUtils.removeAll(col, removeCol); // commons-collections
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       set([1,2,3,4]) - set([2,5])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use std::collections::HashSet;
+
+       let a: HashSet<u32> = vec![1, 2, 3].into_iter().collect();
+       let b: HashSet<_> = [4, 2, 3, 4].iter().cloned().collect();
+
+       let mut difference = a.difference(&b);
+     #+END_SRC
+*** <<
+**** Java
+    #+BEGIN_SRC java
+      List#add()
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       x = [1, 2, 3]
+       x.append(4)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       y.push(10);
+     #+END_SRC
+*** compact
+**** Java
+    #+BEGIN_SRC java
+      boolean result = List#removeAll(Collections.singleton(null));
+      List result = ListUtils.removeAll(col, Collections.singleton(null)); // commons-collections
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       [e for e in x if e]
+     #+END_SRC
+**** Rust
+     无
+*** delete
+**** Java
+    see =compact=
+**** Python
+     #+BEGIN_SRC python
+       x = [3, 4, 5, 6]
+       x.remove(3)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       y.remove(1);  // remove by index
+     #+END_SRC
+
+*** flatten
+**** Java
+     
+    #+BEGIN_SRC java
+      List<List<Object>> list = ...
+          List<Object> flat = list.stream()
+              .flatMap(List::stream)
+              .collect(Collectors.toList());
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       flat_list = [item for sublist in t for item in sublist]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let data = vec![vec![1, 2, 3, 4], vec![5, 6]];
+       let flattened = data.into_iter().flatten().collect::<Vec<u8>>();
+       assert_eq!(flattened, &[1, 2, 3, 4, 5, 6]);
+     #+END_SRC
+*** include?
+**** Java
+    #+BEGIN_SRC java
+      Collection#contains();
+      Stream#anyMatch();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       2 in [2, 3, 4, 5]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       y.contains(&2);
+     #+END_SRC
+*** join
+**** Java
+    #+BEGIN_SRC java
+      String#join();
+      String result = artists.stream().map(Artist::getName).collect(joining(",", "[", "]"));
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       "XX".join([str(e) for e in x])
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       let y: String = y.iter().map(|e| (*e).to_string() ).join(",");
+     #+END_SRC
+*** last
+**** Java
+    #+BEGIN_SRC java
+      // Guava
+      lastElement = Iterables.getLast(iterableList);
+      // You can also provide a default value if the list is empty, instead of an exception:
+      lastElement = Iterables.getLast(iterableList, null);
+
+      stream.skip(count - 1).findFirst().get();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       x[-1]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       println!("{:?}", y.last().unwrap());
+     #+END_SRC
+
+*** first
+**** Java
+    #+BEGIN_SRC java
+      String firstElement = Iterables.getFirst(strings, null); // Guava
+
+      Stream#findfirst();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       x[0]
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       println!("{:?}", y.first().unwrap());
+     #+END_SRC
+*** push / pop / shift / unshift
+**** Java
+    #+BEGIN_SRC java
+      // push
+      List#add();
+      Stack#push();
+      LinkedList#addLast();
+
+      // pop
+      list.remove(list.size-1);
+      Stack#pop();
+      LinkedList#pollLast();
+
+      // shift
+      list.remove(0);
+      LinkedList#pollFirst();
+
+      // unshift
+      list.add(0, obj);
+      LinkedList#addFirst();
+    #+END_SRC
+**** Python
+
+     use =deque=
+     
+**** Rust
+
+     use =VecDeque=
+
+*** reverse
+    
+**** Java
+    #+BEGIN_SRC java
+      Collections.reverse();
+      ArrayUtils.reverse(); // commons-lang
+      IntStream.range(1, 11).boxed().sorted(Collections.reverseOrder()).forEach(System.out::println);
+    #+END_SRC
+
+**** Python
+     #+BEGIN_SRC python
+       list(reversed([1, 2, 3, 4]))
+     #+END_SRC
+
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       y.reverse();
+       let y = y.iter().rev().collect_vec();
+     #+END_SRC
+
+*** rotate
+    
+**** Java
+    #+BEGIN_SRC java
+      Collections.rotate();
+    #+END_SRC
+
+**** Python
+     无
+**** Rust
+     #+BEGIN_SRC rust
+       let mut y = vec![2, 3, 4, 5];
+       y.reverse();
+     #+END_SRC
+*** shuffle
+**** Java
+    #+BEGIN_SRC java
+      Collections.shuffle();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       random.shuffle(x)
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use rand::thread_rng;
+       use rand::seq::SliceRandom;
+
+       fn main() {
+           let mut vec: Vec<u32> = (0..10).collect();
+           vec.shuffle(&mut thread_rng());
+           println!("{:?}", vec);
+       }
+     #+END_SRC
+*** sample
+**** Java
+     无
+**** Python
+     #+BEGIN_SRC python
+       random.sample([1, 2, 3, 4, 5], 3)
+     #+END_SRC
+** Hash
+*** each_key / each_value
+**** Java
+    #+BEGIN_SRC java
+      Map#keySet();
+      Map#values()
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       h = {'name': 'Jack', 'age': 1}
+       h.keys()
+       h.values()
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use std::collections::HashMap;
+
+       let mut map = HashMap::new();
+       map.insert("a", 1);
+       map.insert("b", 2);
+       map.insert("c", 3);
+
+       for key in map.keys() {
+           println!("{}", key);
+       }
+     #+END_SRC
+
+*** invert
+**** Java
+    #+BEGIN_SRC java
+      MapUtils.invertMap(); // commons-collections
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       inv_map = {v: k for k, v in my_map.items()}
+     #+END_SRC
+**** Rust
+     无
+*** merge
+**** Java
+    #+BEGIN_SRC java
+      Map#pullAll()
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       z = x | y  # 3.9+
+       z = {**x, **y}  # 3.5+
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       use std::collections::HashMap;
+
+       // Mutating one map
+       fn merge1(map1: &mut HashMap<(), ()>, map2: HashMap<(), ()>) {
+           map1.extend(map2);
+       }
+
+       // Without mutation
+       fn merge2(map1: HashMap<(), ()>, map2: HashMap<(), ()>) -> HashMap<(), ()> {
+           map1.into_iter().chain(map2).collect()
+       }
+
+       // If you only have a reference to the map to be merged in
+       fn merge_from_ref(map: &mut HashMap<(), ()>, map_ref: &HashMap<(), ()>) {
+           map.extend(map_ref.into_iter().map(|(k, v)| (k.clone(), v.clone())));
+       }
+
+       fn main() {
+           println!("Hello, world!");
+       }
+     #+END_SRC
+*** transform_keys / transform_values
+**** Java
+    #+BEGIN_SRC java
+      // Guava
+      Maps.transformEntries();
+      Maps.transformValues();
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       alphabet =  {k.lower(): v for k, v in alphabet.items()}
+     #+END_SRC
+**** Rust
+     无
+*** values
+**** Java
+    #+BEGIN_SRC java
+      Map#values()
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       h.values()
+     #+END_SRC
+**** Rust
+     #+BEGIN_SRC rust
+       map.values()
+     #+END_SRC
+*** values_at
+**** Java
+    #+BEGIN_SRC java
+      Maps#filterKeys() // Guava
+    #+END_SRC
+**** Python
+     #+BEGIN_SRC python
+       from operator import itemgetter
+       myvalues = itemgetter(*mykeys)(mydict)
+     #+END_SRC
+**** Rust
+     无
+*** slice
+**** Java
+    同 values_at
+**** Python
+     #+BEGIN_SRC python
+       {k:adict[k] for k in ('key1','key2','key99') if k in adict}
+     #+END_SRC
+**** Rust
+     无
+
+* Strings
+** % / format
+*** Java
+   #+BEGIN_SRC java
+     String.format();
+     System.out.printf();
+
+
+     String template = "Hi ${name}! Your number is ${number}";
+     Map<String, String> data = new HashMap<String, String>();
+     data.put("name", "John");
+     data.put("number", "1");
+     // commons-lang
+     String formattedString = StrSubstitutor.replace(template, data)
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      'hello %s %s' % ('Jack', 'David')
+
+      print('%d %s cost $%.2f' % (6, 'bananas', 1.74))
+
+      print('{0} {1} cost ${2}'.format(6, 'bananas', 1.74))
+      print('{quantity} {item} cost ${price}'.format(quantity=6, item='bananas', price=1.74))
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      format!("Hello");                 // => "Hello"
+      format!("Hello, {}!", "world");   // => "Hello, world!"
+      format!("The number is {}", 1);   // => "The number is 1"
+      format!("{:?}", (3, 4));          // => "(3, 4)"
+      format!("{value}", value=4);      // => "4"
+      format!("{} {}", 1, 2);           // => "1 2"
+      format!("{:04}", 42);             // => "0042" with leading zeros
+    #+END_SRC
+** *
+*** Java
+   #+BEGIN_SRC java
+     Strings.repeat(); // Guava
+     StringUtils.repeat(); // commons-lang
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      'hello' * 3
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let y = "hello";
+      let y = y.repeat(3);
+    #+END_SRC
+** <<
+*** Java
+   #+BEGIN_SRC java
+     StringBuilder#append()
+   #+END_SRC
+*** Python
+    无
+*** Rust
+    #+BEGIN_SRC rust
+      let mut y = String::new();
+      y.push_str("hello");
+      y.push_str(" ");
+      y.push_str("world");
+    #+END_SRC
+** =~
+*** Java
+   #+BEGIN_SRC java
+     String#matches()
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      bool(re.match(r"hello[0-9]+", 'hello1'))
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let re = Regex::new(r"(?x)
+        (?P<y>\d{4}) # the year
+        -
+        (?P<m>\d{2}) # the month
+        -
+        (?P<d>\d{2}) # the day
+      ").unwrap();
+
+      re.is_match("hello");
+    #+END_SRC
+** bytes
+*** Java
+   #+BEGIN_SRC java
+     String#getBytes()
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      "hello".encode()
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      "hello".bytes()
+    #+END_SRC
+** capitalize 
+*** Java
+   #+BEGIN_SRC java
+     StringUtils.capitalize(); // commons-lang
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      'hello'.capitalize()
+    #+END_SRC
+*** Rust
+    无
+** chars / codepoints
+*** Java
+   #+BEGIN_SRC java
+     String#getChars();
+     CharSequence#chars();
+     CharSequence#codePoints();
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      [e for e in 'hello']
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      "hello".chars()
+    #+END_SRC
+** chomp!
+*** Java
+   #+BEGIN_SRC java
+     StringUtils.chomp(); // commons-lang
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      "hello\n".rstrip('\n')
+    #+END_SRC
+*** Rust
+
+    =trim_*= / =strip_*=
+** chr / ord
+*** Java
+   #+BEGIN_SRC java
+     String#codePointAt();
+     new String();
+     String.copyValueOf();
+   #+END_SRC
+*** Python
+    chr / ord
+*** Rust
+    https://docs.rs/asciis/0.1.3/asciis/
+** upcase / downcase
+*** Java
+   #+BEGIN_SRC java
+     String#toUpperCase();
+     String#toLowerCase();
+   #+END_SRC
+*** Python
+    upper / lower
+*** Rust
+    to_upercase / to_lowercase
+** each_line / lines
+*** Java
+   #+BEGIN_SRC java
+     String#split();
+
+     new Scanner(str).useDelimiter("\n").forEachRemaining();
+
+     CharSource.wrap(str).lines();
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      'hello\nworld'.splitlines()
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let y = "hello\nworld";
+      let y = y.lines().collect_vec();
+    #+END_SRC
+** start_with? / end_with?
+*** Java
+   #+BEGIN_SRC java
+     String#startsWith();
+     String#endsWith();
+   #+END_SRC
+*** Python
+    starswith / endswith
+*** Rust
+    starts_with / ends_with
+** sub / gsub
+*** Java
+   #+BEGIN_SRC java
+     String#replaceFirst();
+     String#replaceAll();
+   #+END_SRC
+*** Python
+
+    : re.sub(pattern, repl, string, count=0, flags=0)
+
+    Return the string obtained by replacing the leftmost non-overlapping occurrences of pattern in string by the
+    replacement repl. If the pattern isn’t found, string is returned unchanged. repl can be a string or a function; if
+    it is a string, any backslash escapes in it are processed. That is, \n is converted to a single newline character,
+    \r is converted to a carriage return, and so forth. Unknown escapes such as \j are left alone. Backreferences, such
+    as \6, are replaced with the substring matched by group 6 in the pattern. For example:
+
+    #+BEGIN_EXAMPLE
+    >>> re.sub(r'def\s+([a-zA-Z_][a-zA-Z_0-9]*)\s*\(\s*\):',
+    ...        r'static PyObject*\npy_\1(void)\n{',
+    ...        'def myfunc():')
+    'static PyObject*\npy_myfunc(void)\n{'
+    #+END_EXAMPLE
+    
+    If repl is a function, it is called for every non-overlapping occurrence of pattern. The function takes a single
+    match object argument, and returns the replacement string. For example:
+
+    #+BEGIN_EXAMPLE
+    >>> def dashrepl(matchobj):
+    ...     if matchobj.group(0) == '-': return ' '
+    ...     else: return '-'
+    >>> re.sub('-{1,2}', dashrepl, 'pro----gram-files')
+    'pro--gram files'
+    >>> re.sub(r'\sAND\s', ' & ', 'Baked Beans And Spam', flags=re.IGNORECASE)
+    'Baked Beans & Spam'
+    #+END_EXAMPLE
+    
+    The pattern may be a string or an RE object.
+
+*** Rust
+    #+BEGIN_SRC rust
+      lazy_static! {
+          static ref ISO8601_DATE_REGEX : Regex = Regex::new(
+              r"(?P<y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})"
+          ).unwrap();
+      }
+      ISO8601_DATE_REGEX.replace_all(before, "$m/$d/$y")
+    #+END_SRC
+** inspect
+*** Java
+   #+BEGIN_SRC java
+     ReflectionToStringBuilder.toString("hello", ToStringStyle.SIMPLE); // commons-lang
+   #+END_SRC
+*** Python
+    repr
+*** Rust
+    无
+** reverse
+*** Java
+   #+BEGIN_SRC java
+     StringBuffer#reverse();
+     StringBuilder#reverse();
+     StringUtils#reverse(); // commons-lang
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      "hello"[::-1]
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let y = "hello";
+      let y: String = y.chars().rev().collect();
+    #+END_SRC
+** scan
+*** Java
+   #+BEGIN_SRC java
+     java.uti.Scanner
+   #+END_SRC
+*** Python
+    #+BEGIN_EXAMPLE
+      >>> re.split('\W+', 'Words, words, words.')
+      ['Words', 'words', 'words', '']
+      >>> re.split('(\W+)', 'Words, words, words.')
+      ['Words', ', ', 'words', ', ', 'words', '.', '']
+      >>> re.split('\W+', 'Words, words, words.', 1)
+      ['Words', 'words, words.']
+      >>> re.split('[a-f]+', '0a3B9', flags=re.IGNORECASE)
+      ['0', '3', '9']
+    #+END_EXAMPLE
+*** Rust
+    #+BEGIN_SRC rust
+      let re = Regex::new(r"[a-z]+(?:([0-9]+)|([A-Z]+))").unwrap();
+      let caps = re.captures("abc123").unwrap();
+
+      let text1 = caps.get(1).map_or("", |m| m.as_str());
+      let text2 = caps.get(2).map_or("", |m| m.as_str());
+      assert_eq!(text1, "123");
+      assert_eq!(text2, "");
+    #+END_SRC
+** split
+*** Java
+   #+BEGIN_SRC java
+     String#split();
+     java.util.Scanner;
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+       'hello world'.split(' ')
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let y = "hello world";
+      let y = y.split(" ").collect_vec();
+    #+END_SRC
+* IOs
+** each / each_line
+*** Java
+   #+BEGIN_SRC java
+     Files.lines(file).forEach(System.out::println);
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      filepath = 'Iliad.txt'
+      with open(filepath) as fp:
+         for cnt, line in enumerate(fp):
+             print("Line {}: {}".format(cnt, line))
+
+      # Using readlines()
+      file1 = open('myfile.txt', 'r')
+      lines = file1.readlines()
+    #+END_SRC
+
+    #+BEGIN_SRC python
+      from pathlib import Path
+      
+      Path(filename).read_text().splitlines()
+    #+END_SRC
+*** Rust
+    #+BEGIN_SRC rust
+      let f = File::open("foo.txt")?;
+      let f = BufReader::new(f);
+
+      for line in f.lines() {
+          println!("{}", line.unwrap());
+      }
+    #+END_SRC
+** read / readlines
+   #+BEGIN_SRC java
+     Files.lines();
+     Files.readAllLines();
+     Files.readAllBytes();
+     FileUtils.readLines();  // commons-io
+     FileUtils.readFileToString();
+   #+END_SRC
+** basename / dirname
+*** Java
+   #+BEGIN_SRC java
+     FilenameUtils.getBaseName();
+     FilenameUtils.getPath();
+   #+END_SRC
+*** Python
+    =os.path.basename= / =os.path.dirname=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::path::Path;
+      use std::ffi::OsStr;
+
+      // Note: this example does work on Windows
+      let path = Path::new("./foo/bar.txt");
+
+      let parent = path.parent();
+      assert_eq!(parent, Some(Path::new("./foo")));
+
+      let file_stem = path.file_stem();
+      assert_eq!(file_stem, Some(OsStr::new("bar")));
+
+      let extension = path.extension();
+      assert_eq!(extension, Some(OsStr::new("txt")));
+    #+END_SRC
+** absolute_path
+*** Java
+   #+BEGIN_SRC java
+     File#getAbsolutePath();
+     Path#toAbsolutePath();
+     FilenameUtils.getFullPath();
+   #+END_SRC
+*** Python
+     =os.path.abspath("mydir/myfile.txt")=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::fs;
+      use std::path::PathBuf;
+
+      fn main() {
+          let srcdir = PathBuf::from("./src");
+          println!("{:?}", fs::canonicalize(&srcdir));
+
+          let solardir = PathBuf::from("./../solarized/.");
+          println!("{:?}", fs::canonicalize(&solardir));
+      }
+    #+END_SRC
+** atime / mtime
+*** Java
+   #+BEGIN_SRC java
+     BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);
+     FileTime time = attrs.lastAccessTime();
+     FileTime time = attrs.lastModifiedTime();
+     FileTime time = attrs.lastCreationTime();
+
+     File#lastModified();
+   #+END_SRC
+*** Python
+    #+BEGIN_SRC python
+      import os.path, time
+      print("last modified: %s" % time.ctime(os.path.getmtime(file)))
+      print("created: %s" % time.ctime(os.path.getctime(file)))
+    #+END_SRC
+*** Rust
+
+    https://doc.rust-lang.org/std/fs/struct.Metadata.html
+** chmod / chown
+*** Java
+   #+BEGIN_SRC java
+     Files.setOwner();
+     Files.setPosixFilePermissions();
+
+     File#setReadable();
+     File#setWritable();
+     File#setExecutable();
+   #+END_SRC
+*** Python
+    =os.chmod= / =os.chown=
+*** Rust
+    https://doc.rust-lang.org/std/fs/fn.set_permissions.html
+** directory?
+*** Java
+   #+BEGIN_SRC java
+     Files.isDirectory();
+     File#isDirectory();
+   #+END_SRC
+*** Python
+    =os.path.isdir=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::fs::metadata;
+
+      fn main() {
+          let md = metadata(".").unwrap();
+          println!("is dir: {}", md.is_dir());
+          println!("is file: {}", md.is_file());
+      }
+    #+END_SRC
+** exists?
+*** Java
+   #+BEGIN_SRC java
+     Files.exists();
+     File#exist();
+   #+END_SRC
+*** Python
+    =os.path.exists=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::path::Path;
+
+      fn main() {
+          println!("{}", Path::new("/etc/hosts").exists());
+      }
+    #+END_SRC
+** join
+*** Java
+   #+BEGIN_SRC java
+     Paths.get(String first, String... more);
+   #+END_SRC
+*** Python
+    =os.path.join=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::path::{Path, PathBuf};
+
+      assert_eq!(Path::new("/etc").join("passwd"), PathBuf::from("/etc/passwd"));
+    #+END_SRC
+** size
+*** Java
+   #+BEGIN_SRC java
+     Files.size();
+     FileUtils.sizeof(); // commons-io
+   #+END_SRC
+*** Python
+    =os.path.getsize()=
+*** Rust
+    #+BEGIN_SRC rust
+      use std::fs;
+
+      fn main() -> std::io::Result<()> {
+          let metadata = fs::metadata("foo.txt")?;
+
+          assert_eq!(0, metadata.len());
+          Ok(())
+      }
+    #+END_SRC
+* Active Support
+** present?
+   #+BEGIN_SRC java
+     // commons-lang, spring utils
+     StringUtils#isNotBlank();
+     StringUtils#isNotEmpty();
+
+     // commons-collections, spring utils
+     CollectionUtils.isNotEmpty();
+   #+END_SRC
+** blank?
+   #+BEGIN_SRC java
+     // commons-lang, spring utils
+     StringUtils#isBlank();
+     StringUtils#isEmpty();
+
+     // commons-collections, spring utils
+     CollectionUtils.isEmpty();
+   #+END_SRC
+** in_groups
+*** python
+    #+BEGIN_SRC python
+      [l[i::n] for i in range(n)]
+    #+END_SRC
+
+    #+BEGIN_SRC python
+      import numpy as np
+      
+      [list(e) for e in np.array_split(list(range(20)), 6)]
+    #+END_SRC
+    
+** in_groups_of
+   
+*** Java
+    #+BEGIN_SRC java
+      // guava: com.google.common.collect.Lists
+      public static <T> List<List<T>> partition(List<T> list, int size)
+    #+END_SRC
+*** python
+    #+BEGIN_SRC python
+      x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+      
+      [x[i:i+6] for i in range(0, len(x), 6)]
+      # => [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11], [12, 13, 14, 15, 16, 17], [18, 19]]
+    #+END_SRC
