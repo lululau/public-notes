@@ -1,0 +1,60 @@
+
+* 安装 mitmproxy
+  
+  #+BEGIN_SRC sh
+    brew install mitmproxy
+  #+END_SRC
+
+* 开启 macOS TCP/IP 流量转发开关
+  
+  #+BEGIN_SRC sh
+    sudo sysctl -w net.inet.ip.forwarding=1
+  #+END_SRC
+
+* 开启 macOS FireWall NAT
+  
+  
+** 下载 macOS FireWall 配置：
+
+   #+BEGIN_SRC sh
+     wget 'https://github.com/lululau/public-notes/raw/master/mitmproxy.en0.pf.conf'
+   #+END_SRC
+   
+** 开启
+
+   #+BEGIN_SRC sh
+     sudo pfctl -e -f mitmproxy.en0.pf.conf
+   #+END_SRC
+
+* 启动 mitmproxy
+  
+  #+BEGIN_SRC sh
+    sudo mitmproxy -m transparent --showhost
+  #+END_SRC
+ 
+* 修改手机的网关为 Mac 的 IP
+
+  1. 首先记录当前路由器自动分配给手机的 IP 地址和掩码
+  2. 将手机的 IP 分配方式由自动改为手动
+  3. IP 和 掩码填写为第 1 步中记录的值
+  4. 路由器地址修改为 Mac 电脑的局域网 IP
+
+
+* 手机上信任 mitmproxy CA
+
+  1. 访问网站 mitm.it，根据提示，下载并安装证书
+  2. 在 iOS 的设置 -> 通用 -> 关于本机 -> 证书信任设置中，勾选 mitmproxy 证书
+  
+
+* 开始访问
+
+  1. 在手机上访问一个 http 或 https 网站或打开一个 App 进行若干操作，可以看到 mitmproxy 中看到出现对应的请求
+  2. 在 mitmproxy 中使用 j/k 移动光标，选中不同的请求
+  3. 回车查看当前光标下的请求的详细信息
+  4. 在详细信息界面按 TAB 在 Request / Response 之间切换
+  5. 更多 mitmproxy 的功能：https://docs.mitmproxy.org/stable/
+
+* 结束
+  
+  1. 将手机的网站设置修改为自动获取 IP
+  2. 关闭 macOS Firewall NAT 转发： =sudo pfctl -d=

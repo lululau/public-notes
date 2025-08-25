@@ -1,0 +1,1437 @@
+#+TITLE: OrgMode Notes
+#+OPTIONS: H:4 ^:nil toc:nil
+
+* Org structure
+** Copy the visible text in the region into the kill ring.          :REVIEW:
+   : C-c C-x v
+** Next heading. (~outline-next-visible-heading~)
+   : C-c C-n
+** Previous heading. (~outline-previous-visible-heading~)
+   : C-c C-p
+
+** Next heading same level. (~org-forward-same-level~)
+   : C-c C-f
+
+** Previous heading same level. (~org-backward-same-level~)
+   : C-c C-b
+
+** Backward to higher level heading. (~outline-up-heading~)
+   : C-c C-u
+
+** Link format                                                      :REVIEW:
+
+   #+BEGIN_EXAMPLE
+   [[link][description]]  or alternatively  [[link]]
+   #+END_EXAMPLE
+
+** To edit also the invisible ~link~ part
+
+   use ~C-c C-l~ with the cursor on the link.
+
+** To show the internal structure of all links
+
+   : (org-toggle-link-display)  SPC t o
+
+** ~org-store-link~ and global ~org-store-link~ kbds
+
+   + ~org-store-link~: ~C-c l~
+   + global ~org-store-link~: ~SPC a o l~
+
+** ~org-insert-link~
+   ~C-c C-l~
+
+** Insert link to a local file                                       :REVIEW:
+   ~C-u C-c C-l~
+** Open a link
+   ~C-c C-o~
+
+** ~org-toggle-inline-images~
+   ~C-c C-x C-v~  ~, T i~
+
+** Toggle TODO state.
+   ~C-c C-t~ (Evi kbd: ~t~)
+
+** Show TODO list sparse tree.                                      :REVIEW:
+   ~C-c / t~ / ~C-c / T~ / ~, s s~
+
+** Show global TODO list
+   ~C-c a t~
+
+** Customize TODO keywords:                                         :REVIEW:
+
+   #+BEGIN_SRC elisp
+     (setq org-todo-keywords
+           '((sequence "TODO" "FEEDBACK" "VERIFY" "|" "DONE" "DELEGATED")))
+   #+END_SRC
+
+** Setup keyworkds for individual files:                            :REVIEW:
+
+   #+BEGIN_SRC org
+     +TODO: TODO(t) BUG(b) | DONE(d) FIXED(x) FAILED(f) CANCELD(c)
+   #+END_SRC
+
+** Set priority.                                                    :REVIEW:
+   ~C-c ,~
+
+** Checkbox
+
+   Every item in a plain list can be made into a
+   checkbox by starting it with the string ~[ ]~.  This feature is similar
+   to TODO items, but is more lightweight.
+   Checkboxes are not included in the global TODO list, so they are often
+   great to split a task into a number of simple steps.  Or you can use
+   them in a shopping list.  To toggle a checkbox, use ~C-c C-c~, or use
+   the mouse.
+
+   Here is an example of a checkbox list.
+
+   #+BEGIN_SRC org
+     ,* TODO Organize party [2/4]
+       - [-] call people [1/3]
+         - [ ] Peter
+         - [X] Sarah
+         - [ ] Sam
+       - [X] order food
+       - [ ] think about what music to play
+       - [X] talk to the neighbors
+   #+END_SRC
+
+** Export options example:                                          :REVIEW:
+   #+BEGIN_SRC org
+     #+OPTIONS: toc:nil
+   #+END_SRC
+   See Also: [[info:org#Export%20settings]]
+
+** Expose all the headings of the subtree, CONTENT view for just one subtree.
+   ~C-c C-k~     (~show-branches~)
+** Expose all direct children of the subtree.
+
+   With a numeric prefix argument N,
+   expose all children down to level N.
+
+   ~C-c <TAB>~     (~show-children~)
+
+** Show the current subtree in an indirect buffer.                   :REVIEW:
+
+   With a numeric prefix argument N, go up to level N and then take that tree. If N
+   is negative then go up that many levels. With a ~C-u~ prefix, do not remove the
+   previously used indirect buffer.
+
+   ~C-c C-x b~  ~, s b~   (~org-tree-to-indirect-buffer~)
+
+** Insert a new heading/item with the same level as the one at point.
+
+   If the cursor is in a plain list item, a new item is created.
+   To prevent this behavior in lists, call
+   the command with one prefix argument.  When this command is used
+
+   ~M-<RET>~     (~org-insert-heading~)
+
+** Mark the subtree at point.
+   
+   Hitting repeatedly will mark subsequent subtrees of the same level than the
+   marked subtree.
+
+   ~C-c @~     (~org-mark-subtree~)
+
+** Kill subtree, i.e., remove it from buffer but save in kill ring.
+
+   With a numeric prefix argument N, kill N sequential subtrees.
+   ~C-c C-x C-w~     (~org-cut-subtree~)
+** Copy subtree to kill ring.
+   With a numeric prefix argument N, copy
+   the N sequential subtrees.
+   ~C-c C-x M-w~     (~org-copy-subtree~)
+** Yank subtree from kill ring.
+
+   This does modify the level of the subtree to make sure the tree fits in nicely
+   at the yank position. The yank level can also be specified with a numeric prefix
+   argument, or by yanking after a headline marker like ~****~.
+
+   ~C-c C-x C-y~     (~org-paste-subtree~)
+
+** Sort same-level entries.                                          :REVIEW:
+** Turn a normal line or plain list item into a headline
+   (so that it becomes a subheading at its location). Also turn a headline into a
+   normal line by removing the stars.
+   ~C-c *~     (~org-toggle-heading~)  ~, *~
+
+** ~org-sparse-tree~
+   This prompts for an extra key to select a sparse-tree creating
+   command.
+   ~C-c /~  ~, s s~
+
+** Turn the whole plain list into a subtree of the current heading.  :REVIEW:
+   ~C-c C-*~
+
+** orgstruct-mode minor mode
+   If you like the intuitive way the Org mode structure editing and list
+   formatting works, you might want to use these commands in other modes
+   like Text mode or Mail mode as well.  The minor mode ~orgstruct-mode~
+   makes this possible.
+
+** http://orgmode.org/worg/dev/org-syntax.html                      :REVIEW:
+
+* Table
+** Convert the active region to a table.                            :REVIEW:
+
+   ~C-c |~     (~org-table-create-or-convert-from-region~)
+
+   + If every line contains at least one =TAB= character, the function assumes
+     that the material is tab separated.
+   + If every line contains a =comma=, comma-separated values (CSV) are assumed.
+   + If not, lines are split at =whitespace= into fields.
+   + You can use a prefix argument to force a specific separator:
+     + ~C-u~ forces =CSV=
+     + ~C-u C-u~ forces =TAB=
+     + ~C-u C-u C-u~ will prompt for a =regular expression= to match the separator
+
+** Re-align the table and don't move to another field.
+
+   ~C-c C-c~     (~org-table-align~)
+** Blank the field at point or active region.
+
+   ~C-c SPC~     (~org-table-blank-field~)
+
+** Move to beginning of the current table field, or on to the previous field.
+
+   ~M-a~     (~org-table-beginning-of-field~)
+
+** Move to end of the current table field, or on to the next field.
+
+   ~M-e~     (~org-table-end-of-field~)
+
+** Move the current column left/right.
+
+   + ~M-<left>~ :  ~org-table-move-column-left~  ~<~
+   + ~M-<right>~ :  ~org-table-move-column-right~  ~>~
+** Kill the current column.
+
+   ~M-S-<left>~     (~org-table-delete-column~)  ~, t d c~
+
+** Insert a new column to the left of the cursor position.
+
+   ~M-S-<right>~     (~org-table-insert-column~)  ~, t i c~
+
+** Move the current row up/down.
+
+   + ~M-<up>~     ~org-table-move-row-up~  ~, t K~  ~SPC x K~
+   + ~M-<down>~     (~org-table-move-row-down~)  ~, t J~  ~SPC x J~
+** Kill the current row or horizontal line.
+
+   ~M-S-<up>~     (~org-table-kill-row~)   ~, t d r~
+
+** Insert a new row above the current row.
+   With a prefix argument, the line is created below the current one.
+
+   ~M-S-<down>~     (~org-table-insert-row~)  ~,t i r~
+
+** Insert a horizontal line below current row.
+   With a prefix argument, the line is created above the current line.
+
+   ~C-c -~     (~org-table-insert-hline~)
+** Insert a horizontal line below current row, and move the cursor into the row below that line.
+
+   ~C-c <RET>~     (~org-table-hline-and-move~)
+
+** Sort the table lines in the region.                              :REVIEW:
+   The position of point indicates the column to be used for sorting, and the range
+   of lines is the range between the nearest horizontal separator lines, or the
+   entire table. If point is before the first column, you will be prompted for the
+   sorting column. If there is an active region, the mark specifies the first line
+   and the sorting column, while point should be in the last line to be included
+   into the sorting. The command prompts for the sorting type (alphabetically,
+   numerically, or by time). You can sort in normal or reverse order. You can also
+   supply your own key extraction and comparison functions. When called with a
+   prefix argument, alphabetic sorting will be case-sensitive.
+
+   + ~C-c ^~     (~org-table-sort-lines~)
+   + ~, s S n~ sort numerically
+   + ~, s S N~ reverse sort numerically
+   + ~, s S a~ sort alphabetically
+   + ~, s S A~ reverse sort alphabetically
+   + ~, s S t~ sort by time
+   + ~, s S T~ reverse sort by time
+** Copy a rectangular region from a table to a special clipboard.   :REVIEW:
+   Point and mark determine edge fields of the rectangle.  If there
+   is no active region, copy just the current field.  The process
+   ignores horizontal separator lines.
+
+   ~C-c C-x M-w~     (~org-table-copy-region~)
+** Cut a rectangular region from a table                            :REVIEW:
+
+   ~C-c C-x C-w~     (~org-table-cut-region~)
+
+** Paste a rectangular region into a table.                         :REVIEW:
+   The upper left corner ends up in the current field. All involved fields will be
+   overwritten. If the rectangle does not fit into the present table, the table is
+   enlarged as needed. The process ignores horizontal separator lines.
+
+   ~C-c C-x C-y~     (~org-table-paste-rectangle~)
+** Split the current field at the cursor position and move the rest to the line below.
+   If there is an active region, and both point and mark are in the same column,
+   the text in the column is wrapped to minimum width for the given number of
+   lines. A numeric prefix argument may be used to change the number of desired
+   lines. If there is no region, but you specify a prefix argument, the current
+   field is made blank, and the content is appended to the field above.
+
+   ~M-<RET>~     (~org-table-wrap-region~)
+** Sum the numbers in the current column, or in the rectangle defined by the active region.
+   The result is shown in the echo area and can
+   be inserted with ~C-y~.
+
+   ~C-c +~     (~org-table-sum~)
+** Edit the current field in a separate window.
+   This is useful for fields that are not fully visible . When called with a ~C-u~
+   prefix, just make the full field visible, so that it can be edited in place.
+   When called with two ~C-u~ prefixes, make the editor window follow the cursor
+   through the table and always show the current field. The follow mode exits
+   automatically when the cursor leaves the table, or when you repeat this command
+   with ~C-u C-u C-c `~.
+
+   ~C-c `~     (~org-table-edit-field~)
+** Import a file as a table.                                        :REVIEW:
+   The table should be TAB or whitespace separated.
+
+   ~, t I~ (~org-table-import~)
+** Export the table                                                 :REVIEW:
+   by default as a TAB-separated file.
+
+   ~, t E~     (~org-table-export~)
+** column width and alignment:
+
+   ~<N>~  ~<l>~ ~<r>~  ~<c>~ ~<lN>~  ~<cN>~ ~<rN>~
+
+** Column group
+   When Org exports tables, it does so by default without vertical lines
+   because that is visually more satisfying in general.  Occasionally
+   however, vertical lines can be useful to structure a table into groups
+   of columns, much like horizontal lines can do for groups of rows.  In
+   order to specify column groups, you can use a special row where the
+   first field contains only `/'.  The further fields can either contain
+   `<' to indicate that this column should start a group, `>' to indicate
+   the end of a column, or `<>' (no space between `<' and `>') to make a
+   column a group of its own.  Boundaries between column groups will upon
+   export be marked with vertical lines.  Here is an example:
+
+   #+BEGIN_SRC orgmode
+| N | N^2 | N^3 | N^4 | ~sqrt(n)~ | ~sqrt[4](N)~ |
+|---+-----+-----+-----+-----------+--------------|
+| / |   < |     |   > |         < |            > |
+| 1 |   1 |   1 |   1 |         1 |            1 |
+| 2 |   4 |   8 |  16 |    1.4142 |       1.1892 |
+| 3 |   9 |  27 |  81 |    1.7321 |       1.3161 |
+|---+-----+-----+-----+-----------+--------------|
+#+TBLFM: $2=$1^2::$3=$1^3::$4=$1^4::$5=sqrt($1)::$6=sqrt(sqrt(($1)))
+   #+END_SRC
+
+   It is also sufficient to just insert the column group starters after
+   every vertical line you would like to have:
+
+   #+BEGIN_SRC orgmode
+|  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|----+-----+-----+-----+---------+------------|
+| /  | <   |     |     | <       |            |
+   #+END_SRC
+
+** =orgtbl-mode=
+** Show coordinates of a field in echo area
+   ~C-c ?~
+** Toggle the display of a grid.
+   ~C-c }~  ~,t t o~
+** Absolute column specifications:
+
+   =$1=, =$2=
+
+** Relative to current column:                                      :REVIEW:
+   =$+1=, =$-2=
+
+** First and last column:                                           :REVIEW:
+
+   =$<=, =$>=
+
+** Third column from right:                                         :REVIEW:
+
+   =$>>>=
+
+** Absolute row sepecifications:
+
+   =@1=, =@2=
+
+** Relative to current row:
+
+   =@+1=, =@-2=
+
+** First and last row:
+
+   =@<=, =@>=
+** Second data line after third hline:                              :REVIEW:
+
+   =@III+2=
+
+** Current column / row:                                            :REVIEW:
+
+   =@0= / =$0=
+
+** Column / row number of the field where current result will go to: :REVIEW:
+
+   =$#=, =@#=
+
+** Constans:
+
+   #+BEGIN_SRC orgmode
+#+CONSTANTS: c=299792458. pi=3.14 eps=2.4e-6
+
+referenced example: $1=$pi * 3 * 3
+   #+END_SRC
+
+** A formula can contain an optional mode string after a semicolon.  :REVIEW:
+   List of modes:
+   + =p20=
+     Set the internal Calc calculation precision to 20 digits.
+   + =n3=, =s3=, =e2=, =f4=
+     Normal, scientific, engineering or fixed format of the result of
+     Calc passed back to Org.  Calc formatting is unlimited in
+     precision as long as the Calc calculation precision is greater.
+   + =D=, =R=
+     Degree and radian angle modes of Calc.
+   + =F=, =S=
+     Fraction and symbolic modes of Calc.
+   + =T=, =t=
+     Duration computations in Calc or Lisp, *note Durations and time
+     values::.
+   + =E=
+     If and how to consider empty fields.  Without =E= empty fields in
+     range references are suppressed so that the Calc vector or Lisp
+     list contains only the non-empty fields.  With =E= the empty
+     fields are kept.  For empty fields in ranges or empty field
+     references the value =nan= (not a number) is used in Calc formulas
+     and the empty string is used for Lisp formulas.  Add =N= to use 0
+     instead for both formula types.  For the value of a field the mode
+   + =N= has higher precedence than =E=.
+   + =N=
+     Interpret all fields as numbers, use 0 for non-numbers.  See the
+     next section to see how this is essential for computations with
+     Lisp formulas.  In Calc formulas it is used only occasionally
+     because there number strings are already interpreted as numbers
+     without =N=.
+   + =L=
+     Literal, for Lisp formulas only.  See the next section.
+   A few examples:
+
+   | =$1+$2=            | Sum of first and second field                  |
+   | =$1+$2;%.2f=       | Same, format result to two decimals            |
+   | =exp($2)+exp($1)=  | Math functions can be used                     |
+   | =$0;%.1f=          | Reformat current cell to 1 decimal             |
+   | =($3-32)*5/9=      | Degrees F -> C conversion                      |
+   | =$c/$1/$cm=        | Hz -> cm conversion, using `constants.el'      |
+   | =tan($1);Dp3s1=    | Compute in degrees, precision 3, display SCI 1 |
+   | =sin($1);Dp3%.1e=  | Same, but use printf specifier for display     |
+   | =taylor($3,x=7,2)= | Taylor series of $3, at x=7, second degree     |
+
+   ~if($1 < 20, teen, string(""))~
+   "teen" if age $1 is less than 20, else the Org table result field
+   is set to empty with the empty string.
+
+   ~if("$1" == "nan" || "$2" == "nan", string(""), $1 + $2); E f-1~
+   Sum of the first two columns.  When at least one of the input
+   fields is empty the Org table result field is set to empty.  ~E~
+   is required to not convert empty fields to 0.  ~f-1~ is an
+   optional Calc format string similar to ~%.1f~ but leaves empty
+   results empty.
+
+   ~if(typeof(vmean($1..$7)) == 12, string(""), vmean($1..$7); E~
+   Mean value of a range unless there is any empty field.  Every
+   field in the range that is empty is replaced by ~nan~ which lets
+   ~vmean~ result in ~nan~.  Then ~typeof == 12~ detects the ~nan~
+   from ~vmean~ and the Org table result field is set to empty.  Use
+   this when the sample set is expected to never have missing values.
+
+   ~if("$1..$7" == "[]", string(""), vmean($1..$7))~
+   Mean value of a range with empty fields skipped.  Every field in
+   the range that is empty is skipped.  When all fields in the range
+   are empty the mean value is not defined and the Org table result
+   field is set to empty.  Use this when the sample set can have a
+   variable size.
+
+   ~vmean($1..$7); EN~
+   To complete the example before: Mean value of a range with empty
+   fields counting as samples with value 0.  Use this only when
+   incomplete sample sets should be padded with 0 to the full size.
+
+   You can add your own Calc functions defined in Emacs Lisp with
+   ~defmath~ and use them in formula syntax for Calc.
+
+** If a formula starts with an apostrophe followed by an opening    :REVIEW:
+   parenthesis, then it is evaluated as a Lisp form.
+   With Emacs Lisp forms, you need to be conscious about the way field
+   references are interpolated into the form.  By default, a reference
+   will be interpolated as a Lisp string (in double-quotes) containing the
+   field.  If you provide the ~N~ mode switch, all referenced elements
+   will be numbers (non-number fields will be zero) and interpolated as
+   Lisp numbers, without quotes.  If you provide the ~L~ flag, all fields
+   will be interpolated literally, without quotes.  I.e., if you want a
+   reference to be interpreted as a string by the Lisp form, enclose the
+   reference operator itself in double-quotes, like ~"$3"~.  Ranges are
+   inserted as space-separated fields, so you can embed them in list or
+   vector syntax.
+   Here are a few examples--note how the ~N~ mode is used when we do
+   computations in Lisp:
+   #+BEGIN_SRC elisp
+     '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
+   #+END_SRC
+   Swap the first two characters of the content of column 1.
+
+   #+BEGIN_SRC elisp
+     '(+ $1 $2);N
+   #+END_SRC
+   Add columns 1 and 2, equivalent to Calc~s ~$1+$2~.
+
+   #+BEGIN_SRC elisp
+     ~'(apply ~+ ~($1..$4));N~
+   #+END_SRC
+   Compute the sum of columns 1 to 4, like Calc~s ~vsum($1..$4)~.
+
+** To assign a formula to a particular field, type it directly into the field, preceded by ~:=~
+   or ~C-u C-c =~
+
+** To assign a formula to a column, type it directly into any field in the column, preceded by an equal sign, like ~=$1+$2~.
+   or ~C-c =~
+
+** Kbds in formula editing buffer:
+   + ~C-c '~ edit all formulas in the special editing buffer
+   + ~C-c C-c~ finish editing
+   + ~C-c C-q~ exit editing
+   + ~C-c C-r~ Toggle references in the formulas buffer between standard (like =B2=) and internal (like =@2$2=)
+
+** ~C-u C-c C-c~ Apply formulas for current table
+** ~C-u *~ Apply formulas for current row
+** =[[#my-custom-id] ]= which will link to the entry with the =CUSTOM_ID= property =my-custom-id=.
+** Links such as =[[My Target] ]= or =[[My Target][Find my target] ]= lead to a text search in the current file. :REVIEW:
+   + dedicated target: =<<My Target>>=
+   + element with name: =#+NAME: My Target=
+   + a headline that is exactly the link text but may also include a TODO keyword and tags(1).
+   + normal text search
+** External Links:
+   | Link                                        | Description                                   |
+   |---------------------------------------------+-----------------------------------------------|
+   | =file:sometextfile::NNN=                    | file, jump to line number                     |
+   | =file:projects.org::some words=             | text search in Org file(1)                    |
+   | =file:projects.org::*task=                  | title heading search in Org                   |
+   | =shell:ls *.org=                            | A shell command                               |
+   | =elisp:org-agenda=                          | Interactive Elisp command                     |
+   | =elisp:(find-file-other-frame "Elisp.org")= | Elisp form to evaluate                        |
+   | =file:xx.org::#my_custom_id=                | Link to a heading with a =CUSTOM_ID= property |
+   | =file:xx.org::/regexp/=                     | Do a regular expression search for =regexp=   |
+
+* =TODO= items
+** ~S-M-<RET>~     (~org-insert-todo-heading~)                       :REVIEW:
+   Insert a new TODO entry below the current one.
+** Fast access to TODO states
+   #+BEGIN_SRC elisp
+     (setq org-todo-keywords
+           '((sequence "TODO(t)" "|" "DONE(d)")
+             (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f)")
+             (sequence "|" "CANCELED(c)")))
+   #+END_SRC
+** Setting up keywords for individual files                         :REVIEW:
+   #+BEGIN_SRC org
+     ,#+TODO: TODO(t) BUG(b) | DONE(d) FIXED(x) FAILED(f) CANCELD(c)
+   #+END_SRC
+** Setup for using several sets in parallel would be:
+   #+BEGIN_SRC elisp
+     ,#+TODO: TODO | DONE
+     ,#+TODO: REPORT BUG KNOWNCAUSE | FIXED
+     ,#+TODO: | CANCELED
+   #+END_SRC
+
+** Multiple keyword sets in one file:
+   #+BEGIN_SRC elisp
+     (setq org-todo-keywords
+           '((sequence "TODO" "|" "DONE")
+             (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED")
+             (sequence "|" "CANCELED")))
+   #+END_SRC
+** ~C-c ,~ set priority
+** Individual buffer priority setting:
+   #+BEGIN_SRC orgmode
+#+PRIORITIES: A C B
+   #+END_SRC
+** ~M-S-<RET>~ on plain list item => add a new item with checkbox    :REVIEW:
+
+* Properties and Columns
+
+** You may define the allowed values for a particular property =:Xyz:= by setting a property =:Xyz_ALL:=.
+
+** If you want to set properties that can be inherited by any entry in a file, use a line like
+   #+BEGIN_SRC orgmode
+#+PROPERTY: NDisks_ALL 1 2 3 4
+   #+END_SRC
+
+** The following property names are special and should not be used as keys in the properties drawer:
+
+   + ALLTAGS
+     All tags, including inherited ones.
+   + BLOCKED
+     "t" if task is currently blocked by children or siblings.
+   + CLOCKSUM
+     The sum of CLOCK intervals in the subtree. =org-clock-sum=
+     must be run first to compute the values in the current buffer.
+   + CLOCKSUM_T
+     The sum of CLOCK intervals in the subtree for today.
+     =org-clock-sum-today= must be run first to compute the
+     values in the current buffer.
+   + CLOSED
+     When was this entry closed?
+   + DEADLINE
+     The deadline time string, without the angular brackets.
+   + FILE
+     The filename the entry is located in.
+   + ITEM
+     The headline of the entry, with stars.
+   + PRIORITY
+     The priority of the entry, a string with a single letter.
+   + SCHEDULED
+     The scheduling timestamp, without the angular brackets.
+   + TAGS
+     The tags defined directly in the headline.
+   + TIMESTAMP
+     The first keyword-less timestamp in the entry.
+   + TIMESTAMP_IA
+     The first inactive timestamp in the entry.
+   + TODO
+     The TODO keyword of the entry.
+
+** To define a column format for an entire file, use a line like:
+   #+BEGIN_SRC orgmode
+#+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
+   #+END_SRC
+
+** To specify a format that only applies to a specific tree, add a =:COLUMNS:= property to the top node of that tree, for example: :REVIEW:
+   #+BEGIN_SRC orgmode
+ ** Top node for columns view
+    :PROPERTIES:
+    :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
+    :END:
+   #+END_SRC
+
+** Column attributes                                                 :REVIEW:
+   #+BEGIN_SRC orgmode
+    %[WIDTH]PROPERTY[(TITLE)][{SUMMARY-TYPE}]
+
+        WIDTH           An integer specifying the width of the column in characters.
+                        If omitted, the width will be determined automatically.
+        PROPERTY        The property that should be edited in this column.
+                        Special properties representing meta data are allowed here
+                        as well (*note Special properties::)
+        TITLE           The header text for the column.  If omitted, the property
+                        name is used.
+        {SUMMARY-TYPE}  The summary type.  If specified, the column values for
+                        parent nodes are computed from the children.
+                        Supported summary types are:
+                        {+}       Sum numbers in this column.
+                        {+;%.1f}  Like `+', but format result with `%.1f'.
+                        {$}       Currency, short for `+;%.2f'.
+                        {:}       Sum times, HH:MM, plain numbers are hours.
+                        {X}       Checkbox status, `[X]' if all children are `[X]'.
+                        {X/}      Checkbox status, `[n/m]'.
+                        {X%}      Checkbox status, `[n%]'.
+                        {min}     Smallest number in column.
+                        {max}     Largest number.
+                        {mean}    Arithmetic mean of numbers.
+                        {:min}    Smallest time value in column.
+                        {:max}    Largest time value.
+                        {:mean}   Arithmetic mean of time values.
+                        {@min}    Minimum age (in days/hours/mins/seconds).
+                        {@max}    Maximum age (in days/hours/mins/seconds).
+                        {@mean}   Arithmetic mean of ages (in days/hours/mins/seconds).
+                        {est+}    Add `low-high' estimates.
+   #+END_SRC
+
+** ~C-c C-x C-c~ show column view                                    :REVIEW:
+*** ~<left> <right> <up> <down>~   Move through the column view from field to field.
+*** ~n     (~org-columns-next-allowed-value~)
+*** ~p     (~org-columns-previous-allowed-value~)
+*** ~e~     (~org-columns-edit-value~) Edit the property at point.
+*** ~<     (~org-columns-narrow~)
+*** ~>     (~org-columns-widen~) Make the column narrower/wider by one character.
+*** ~S-M-<right>     (~org-columns-new~) Insert a new column, to the left of the current column.
+*** ~S-M-<left>     (~org-columns-delete~) Delete the current column.
+
+** Capturing column view
+   If you want to capture a column view, use a ~columnview~ dynamic block.  The frame of
+   this block looks like this:
+   #+BEGIN_SRC orgmode
+ * The column view
+ #+BEGIN: columnview :hlines 1 :id "label"
+ #+END:
+   #+END_SRC
+
+   This dynamic block has the following parameters:
+
+   ~:id~
+   This is the most important parameter.  Column view is a feature
+   that is often localized to a certain (sub)tree, and the capture
+   block might be at a different location in the file.  To identify
+   the tree whose view to capture, you can use 4 values:
+   local     use the tree in which the capture block is located
+   global    make a global view, including all headings in the file
+   "file:PATH-TO-FILE"
+   run column view at the top of this file
+   "ID"      call column view in the tree that has an ~:ID:~
+   property with the value label.  You can use
+   ~M-x org-id-copy RET~ to create a globally unique ID for
+   the current entry and copy it to the kill-ring.
+
+   ~:hlines~
+   When ~t~, insert an hline after every line.  When a number N,
+   insert an hline before each headline with level ~<= N~.
+
+   ~:vlines~
+   When set to ~t~, force column groups to get vertical lines.
+
+   ~:maxlevel~
+   When set to a number, don~t capture entries below this level.
+
+   ~:skip-empty-rows~
+   When set to ~t~, skip rows where the only non-empty specifier of
+   the column view is ~ITEM~.
+
+   ~C-c C-x i     (~org-insert-columns-dblock~)~
+   Insert a dynamic block capturing a column view.  You will be
+   prompted for the scope or ID of the view.
+
+   ~C-c C-c  or  C-c C-x C-u     (~org-dblock-update~)~
+   Update dynamic block at point.  The cursor needs to be in the
+   ~#+BEGIN~ line of the dynamic block.
+
+   ~C-u C-c C-x C-u     (~org-update-all-dblocks~)~
+   Update all dynamic blocks (*note Dynamic blocks::).  This is
+   useful if you have several clock table blocks, column-capturing
+   blocks or other dynamic blocks in a buffer.
+
+* Dates and Times
+** Format:                                                           :REVIEW:
+
+   #+BEGIN_SRC org-mode
++ PLAIN TIMESTAMP;
+  + Meet Peter at the movies <2006-11-01 Wed 19:15>
+  + Discussion on climate change <2006-11-02 Thu 20:00-22:00>
++ TIMESTAMP WITH REPEATER INTERVAL
+  + Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
++ TIME/DATE RANGE
+  + Meeting in Amsterdam <2004-08-23 Mon>--<2004-08-26 Thu>
++ INACTIVE TIMESTAMP
+  + Gillian comes late for the fifth time [2006-11-01 Wed]
+   #+END_SRC
+
+**  Creating timestamps
+   + ~C-c .~  ~, d t~   (~org-time-stamp~)
+   + ~C-c !~   ~, d T~  (~org-time-stamp-inactive~)
+     Like ~C-c .~, but insert an inactive timestamp that will not cause
+     an agenda entry.
+   + ~C-u C-c .~
+   + ~C-u C-c !~
+     Like ~C-c .~ and ~C-c !~, but use the alternative format which
+     contains date and time.
+   + ~S-<left>~  ~M-h~   (~org-timestamp-down-day~)
+   + ~S-<right>~  ~M-l~   (~org-timestamp-up-day~)
+     Change date at cursor by one day.
+   + ~S-<up>~     (~org-timestamp-up~)
+   + ~S-<down>~     (~org-timestamp-down-down~)
+     Change the item under the cursor in a timestamp.  The cursor can
+     be on a year, month, day, hour or minute.  When the timestamp
+     contains a time range like ~15:30-16:30~, modifying the first time
+     will also shift the second, shifting the time block with constant
+     length.  To change the length, modify the second time.  Note that
+     if the cursor is in a headline and not at a timestamp, these same
+     keys modify the priority of an item.
+   + ~C-c C-y~     (~org-evaluate-time-range~)
+     Evaluate a time range by computing the difference between start
+     and end.  With a prefix argument, insert result after the time
+     range (in a table: into the following column).
+
+** ~, d d~ Add Deadline
+** ~, d s~ Add Scheduling
+* Capture Refile and Archive
+** The following customization sets a default target file for notes, and
+   defines a global key(1)  for capturing new material.
+   #+BEGIN_SRC elisp
+     (setq org-default-notes-file (concat org-directory "/notes.org"))
+     (define-key global-map "\C-cc" 'org-capture)
+   #+END_SRC
+
+** capture template format:
+
+   Each entry in ~org-capture-templates~ is a list with the following items:
+
+   + KEYS
+     The keys that will select the template, as a string, characters
+     only, for example "a" for a template to be selected with a
+     single key, or "bt" for selection with two keys.
+   + DESCRIPTION
+     A short string describing the template
+   + TYPE
+     The type of entry, a symbol.  Valid values are:
+     + ~entry~
+       An Org mode node, with a headline.  Will be filed as the
+       child of the target entry or as a top-level entry.  The
+       target file should be an Org mode file.
+     + ~item~
+       A plain list item, placed in the first plain  list at the
+       target location.  Again the target file should be an Org file.
+     + ~checkitem~
+       A checkbox item.  This only differs from the plain list item
+       by the default template.
+     + ~table-line~
+       a new line in the first table at the target location.  Where
+       exactly the line will be inserted depends on the properties
+       ~:prepend~ and ~:table-line-pos~.
+     + ~plain~
+       Text to be inserted as it is.
+
+   + TARGET
+     Specification of where the captured item should be placed.
+     Valid values are:
+     + ~(file "path/to/file")~
+       Text will be placed at the beginning or end of that file.
+     + ~(id "id of existing org entry")~
+       Filing as child of this entry, or in the body of the entry.
+     + ~(file+headline "path/to/file" "node headline")~
+       Fast configuration if the target heading is unique in the
+       file.
+     + ~(file+olp "path/to/file" "Level 1 heading" "Level 2" ...)~
+       For non-unique headings, the full path is safer.
+     + ~(file+regexp  "path/to/file" "regexp to find location")~
+       Use a regular expression to position the cursor.
+     + ~(file+datetree "path/to/file")~
+       Will create a heading in a date tree for today~s date(1).
+     + ~(file+datetree+prompt "path/to/file")~
+       Will create a heading in a date tree, but will prompt for the
+       date.
+     + ~(file+function "path/to/file" function-finding-location)~
+       A function to find the right location in the file.
+     + ~(clock)~
+       File to the entry that is currently being clocked.
+     + ~(function function-finding-location)~
+       Most general way, write your own function to find both file
+       and location.
+
+   + TEMPLATE
+     The template for creating the capture item.  If you leave this
+     empty, an appropriate default template will be used.  Otherwise
+     this is a string with escape codes, which will be replaced
+     depending on time and context of the capture call.  The string
+     with escapes may be loaded from a template file, using the special
+     syntax ~(file "path/to/template")~.
+     In the template itself, special `%'-escapes(1) allow dynamic insertion
+     of content.  The templates are expanded in the order given here:
+     | Code         | Description                                                       |
+     |--------------+-------------------------------------------------------------------|
+     | =%[FILE]=    | Insert the contents of the file given by FILE.                    |
+     | =%(SEXP)=    | Evaluate Elisp SEXP and replace with the result.                  |
+     |              | For convenience, %:keyword (see below) placeholders               |
+     |              | within the expression will be expanded prior to this.             |
+     |              | The sexp must return a string.                                    |
+     | =%<...>=     | The result of format-time-string on the ... format specification. |
+     | =%t=         | Timestamp, date only.                                             |
+     | =%T=         | Timestamp, with date and time.                                    |
+     | =%u,%U=      | Like the above, but inactive timestamps.                          |
+     | =%i=         | Initial content, the region when capture is called while the      |
+     |              | region is active.                                                 |
+     |              | The entire text will be indented like ~%i~ itself.                |
+     | =%a=         | Annotation, normally the link created with ~org-store-link~.      |
+     | =%A=         | Like ~%a~, but prompt for the description part.                   |
+     | =%l=         | Like %a, but only insert the literal link.                        |
+     | =%c=         | Current kill ring head.                                           |
+     | =%x=         | Content of the X clipboard.                                       |
+     | =%k=         | Title of the currently clocked task.                              |
+     | =%K=         | Link to the currently clocked task.                               |
+     | =%n=         | User name (taken from ~user-full-name~).                          |
+     | =%f=         | File visited by current buffer when org-capture was called.       |
+     | =%F=         | Full path of the file or directory visited by current buffer.     |
+     | =%:keyword=  | Specific information for certain link types, see below.           |
+     | =%^g=        | Prompt for tags, with completion on tags in target file.          |
+     | =%^G=        | Prompt for tags, with completion all tags in all agenda files.    |
+     | =%^t=        | Like ~%t~, but prompt for date.  Similarly ~%^T~, ~%^u~, ~%^U~.   |
+     |              | You may define a prompt like ~%^{Birthday}t~.                     |
+     | =%^C=        | Interactive selection of which kill or clip to use.               |
+     | =%^L=        | Like ~%^C~, but insert as link.                                   |
+     | =%^{PROP}p=  | Prompt the user for a value for property PROP.                    |
+     | =%^{PROMPT}= | prompt the user for a string and replace this sequence with it.   |
+     |              | You may specify a default value and a completion table with       |
+     |              | ~%^{prompt¦default¦completion2¦completion3...}~.                  |
+     |              | The arrow keys access a prompt-specific history.                  |
+     | =%\\n=       | Insert the text entered at the nth %^{PROMPT}, where ~n~ is       |
+     |              | a number, starting from 1.                                        |
+     | =%?=         | After completing the template, position cursor here.              |
+   + PROPERTIES
+     The rest of the entry is a property list of additional options.
+     Recognized properties are:
+     + ~:prepend~
+       Normally new captured information will be appended at the
+       target location (last child, last table line, last list
+       item...).  Setting this property will change that.
+     + ~:immediate-finish~
+       When set, do not offer to edit the information, just file it
+       away immediately.  This makes sense if the template only needs
+       information that can be added automatically.
+     + ~:empty-lines~
+       Set this to the number of lines to insert before and after
+       the new item.  Default 0, only common other value is 1.
+     + ~:clock-in~
+       Start the clock in this item.
+     + ~:clock-keep~
+       Keep the clock running when filing the captured entry.
+     + ~:clock-resume~
+       If starting the capture interrupted a clock, restart that
+       clock when finished with the capture.  Note that
+     + ~:clock-keep~ has precedence over ~:clock-resume~. When
+       setting both to ~t~, the current clock will run and the
+       previous one will not be resumed.
+     + ~:unnarrowed~
+       Do not narrow the target buffer, simply show the full buffer.
+       Default is to narrow it so that you only see the new material.
+     + ~:table-line-pos~
+       Specification of the location in the table where the new line
+       should be inserted. It can be a string, a variable holding a
+       string or a function returning a string. The string should
+       look like ~"II-3"~ meaning that the new line should become
+       the third line before the second horizontal separator line.
+     + ~:kill-buffer~
+       If the target file was not yet visited when capture was
+       invoked, kill the buffer again after capture is completed.
+
+** ~C-u C-c C-w~ or ~C-u , R~ (global: ~SPC a o R~) Use the refile interface to jump to a heading.
+** ~, s a~ ~org-archive-subtree~
+** Internal archiving                                               :REVIEW:
+   If you want to just switch off (for agenda views) certain subtrees
+   without moving them to a different file, you can use the ~ARCHIVE tag~.
+   A headline that is marked with the ARCHIVE tag (*note Tags::) stays
+   at its location in the outline tree, but behaves in the following way:
+
+   + It does not open when you attempt to do so with a visibility cycling command.
+   + not exposed in sparse tree
+   + During agenda view construction, the content of archived trees is ignored.
+   + Archived trees are excluded from column view.
+
+   ~C-c C-x a~ Toggle the ARCHIVE tag for the current headline.
+
+* Agenda
+** restriction                                                       :REVIEW:
+   If you would like to focus the agenda temporarily on a file not in
+   this list, or on just one file in the list, or even on only a subtree
+   in a file, then this can be done in different ways.  For a single
+   agenda command, you may press ~<~ once or several times in the
+   dispatcher (*note Agenda dispatcher::).  To restrict the agenda scope
+   for an extended period, use the following commands:
+
+   + ~C-c C-x <~     (~org-agenda-set-restriction-lock~)
+     Permanently restrict the agenda to the current subtree.  When with
+     a prefix argument, or with the cursor before the first headline in
+     a file, the agenda scope is set to the entire file.  This
+     restriction remains in effect until removed with ~C-c C-x >~, or
+     by typing either ~<~ or ~>~ in the agenda dispatcher.  If there is
+     a window displaying an agenda view, the new restriction takes
+     effect immediately.
+   + ~C-c C-x >~     (~org-agenda-remove-restriction-lock~)
+     Remove the permanent restriction created by ~C-c C-x <~.
+
+** Each lin in org-agenda-view starts with a prefix contains the category.
+
+   The category is a broad label assigned to each agenda item.  By
+   default, the category is simply derived from the file name, but you can
+   also specify it with a special line in the buffer, like this:
+
+   :  #+CATEGORY: Thesis
+
+   If you would like to have a special CATEGORY for a single entry or a
+   (sub)tree, give the entry a ~:CATEGORY:~ property with the special
+   category you want to apply as the value.
+
+** Some key bindings in the agenda buffer:
+
+   + ~\~ org-agenda-filter-by-tag
+   + ~=~ org-agenda-filter-by-regexp
+
+** Commands in agenda buffer
+   + ~L~ org-agenda-log-mde
+   + ~F~ org-agenda-follow-mode
+   + ~A~ Interactively select another agenda view and append it to the current view.
+   + ~.~ Goto today
+   + ~C-c C-x C-c~ toggle org-agenda-columns
+   + ~t~ Change the TODO state of the item, both in the agenda and in the original org file.
+   + ~,~ Set the priority for the current item.
+   + ~M~ Show the phases of the moon for the three months around current date.
+   + ~S~ Show sunrise and sunset times.  (Beijing: 116.46	39.92)
+   + ~C~ Convert the date at cursor into many other cultural and historic calendars (include chinky lunar).
+   + ~H~ Show holidays for three months around the cursor date.
+
+* Markup for rich export
+
+** Document title
+   :  #+TITLE: This is the title of the document
+   If you are exporting only a subtree, its heading will become the
+   title of the document.  If the subtree has a property ~EXPORT_TITLE~,
+   that will take precedence.
+
+** Heading and Sections
+   By default, only the first three outline levels will be used as headings. Deeper
+   levels will become itemized lists. You can change the location of this switch
+   globally by setting the variable ~org-export-headline-levels~, or on a per-file
+   basis with a line
+
+   : #+OPTIONS: H:4
+
+** TOC
+   The table of contents is normally inserted directly before the first
+   headline of the file.  The depth of the table is by default the same as
+   the number of headline levels, but you can choose a smaller number, or
+   turn off the table of contents entirely, by configuring the variable
+   ~org-export-with-toc~, or on a per-file basis with a line like
+
+   #+BEGIN_SRC orgmode
+#+OPTIONS: toc:2          only inlcude two levels in TOC
+#+OPTIONS: toc:nil        no default TOC at all
+#+END_VERSE
+
+   If you would like to move the table of contents to a different
+location, you should turn off the default table using
+~org-export-with-toc~ or ~#+OPTIONS~ and insert ~#+TOC: headlines N~ at
+the desired location(s).
+
+#+BEGIN_SRC orgmode
+#+OPTIONS: toc:nil        no default TOC
+...
+#+TOC: headlines 2        insert TOC here, with two headline levels
+   #+END_SRC
+
+   Moreover, if you append ~local~ parameter, the table contains only
+   entries for the children of the current section(1).  In this case, any
+   depth parameter becomes relative to the current level.
+
+   #+BEGIN_SRC orgmode
+ * Section
+ #+TOC: headlines 1 local  insert local TOC, with direct children only
+   #+END_SRC
+
+   The same ~TOC~ keyword can also generate a list of all tables (resp.
+   all listings) with a caption in the document.
+
+   #+BEGIN_SRC orgmode
+#+TOC: listings           build a list of listings
+#+TOC: tables             build a list of tables
+   #+END_SRC
+
+   The headline's title usually determines its corresponding entry in a
+   table of contents.  However, it is possible to specify an alternative
+   title by setting ~ALT_TITLE~ property accordingly.  It will then be
+   used when building the table.
+
+** Comment lines
+   Lines starting with zero or more whitespace characters followed by one
+   ~#~ and a whitespace are treated as comments and, as such, are not
+   exported.
+
+   Likewise, regions surrounded by ~#+BEGIN_COMMENT~ ...
+   ~#+END_COMMENT~ are not exported.
+
+   Finally, a ~COMMENT~ keyword at the beginning of an entry, but after
+   any other keyword or priority cookie, comments out the entire subtree.
+   In this case, the subtree is not exported and no code block within it
+   is executed either(1).  The command below helps changing the comment
+   status of a headline.
+
+   ~C-c ;~
+   Toggle the ~COMMENT~ keyword at the beginning of an entry.
+
+** Literal Examples
+   For simplicity when using small examples, you can also start
+   the example lines with a colon followed by a space.  There may also be
+   additional whitespace before the colon: Here is an example:
+   : : Some example from a text file.
+
+   Both in ~example~ and in ~src~ snippets, you can add a ~-n~ switch
+   to the end of the ~BEGIN~ line, to get the lines of the example
+   numbered.  If you use a ~+n~ switch, the numbering from the previous
+   numbered snippet will be continued in the current one.  In literal
+   examples, Org will interpret strings like ~(ref:name)~ as labels, and
+   use them as targets for special hyperlinks like ~[[(name)]]~ (i.e., the
+   reference name enclosed in single parenthesis).  In HTML, hovering the
+   mouse over such a link will remote-highlight the corresponding code
+   line, which is kind of cool.
+
+   You can also add a ~-r~ switch which removes the labels from the
+   source code(3).  With the ~-n~ switch, links to these references will
+   be labeled by the line numbers from the code listing, otherwise links
+   will use the labels with no parentheses.
+
+** Include files                                                     :REVIEW:
+   During export, you can include the content of another file.  For
+   example, to include your ~.emacs~ file, you could use:
+
+   :  #+INCLUDE: "~/.emacs" src emacs-lisp
+
+   The first parameter names the the file to include.  The optional second
+   and third parameter specify the markup (i.e., ~example~ or ~src~), and,
+   if the markup is ~src~, the language for formatting the contents.
+
+   If markup is requested, the included content will be placed within an
+   appropriate block.If no markup is requested, the text will be assumed to be in
+   Org mode format and will be processed normally.
+
+   You can also include a portion of a file by specifying a lines range
+   using the ~:lines~ keyword parameter.  The line at the upper end of the
+   range will not be included.  The start and/or the end of the range may
+   be omitted to use the obvious defaults.
+
+   #+BEGIN_SRC orgmode
+#+INCLUDE: "~/.emacs" :lines "5-10"   Include lines 5 to 10, 10 excluded
+#+INCLUDE: "~/.emacs" :lines "-10"    Include lines 1 to 10, 10 excluded
+#+INCLUDE: "~/.emacs" :lines "10-"    Include lines from 10 to EOF
+   #+END_SRC
+
+   Finally, you may use a file-link to extract an object as matched by
+   ~org-link-search~(2) (*note Search options::).  If the ~:only-contents~
+   property is non-~nil~, only the contents of the requested element will
+   be included, omitting properties drawer and planning-line if present.
+   The ~:lines~ keyword operates locally with respect to the requested
+   element.  Some examples:
+
+   #+BEGIN_SRC orgmode
+#+INCLUDE: "./paper.org::#theory" :only-contents t
+  Include the body of the heading with the custom id ~theory~
+#+INCLUDE: "./paper.org::mytable"  Include named element.
+#+INCLUDE: "./paper.org::*conclusion" :lines 1-20
+  Include the first 20 lines of the headline named conclusion.
+   #+END_SRC
+
+   ~C-c '~ Visit the include file at point.
+
+** Macro replacement                                                 :REVIEW:
+   You can define text snippets with
+
+   :  #+MACRO: name   replacement text $1, $2 are arguments
+
+   which can be referenced ~{{{name(arg1, arg2)}}}~
+
+   In addition to user-defined macros, a set of predefined macros can
+   be used:
+
+   + ~{{{title}}}~
+   + ~{{{author}}}~
+   + ~{{{email}}}~
+     These macros are replaced with the information available at the
+     time of export.
+   + ~{{{date}}}~
+   + ~{{{date(FORMAT)}}}~
+     This macro refers to the ~#+DATE~ keyword. FORMAT is an optional
+     argument to the ~{{{date}}}~ macro that will be used only if
+     ~#+DATE~ is a single timestamp.  FORMAT should be a format string
+     understood by ~format-time-string~.
+   + ~{{{time(FORMAT)}}}~
+   + ~{{{modification-time(FORMAT)}}}~
+     These macros refer to the date and time when the document is
+     exported and to the modification date and time of the file being
+     exported, respectively.  FORMAT should be a format string
+     understood by ~format-time-string~.
+   + ~{{{input-file}}}~
+     This macro refers to the filename of the exported file, if any.
+   + ~{{{property(PROPERTY-NAME)}}}~
+   + ~{{{property(PROPERTY-NAME,SEARCH-OPTION)}}}~
+     This macro returns the value of property PROPERTY-NAME in current
+     entry.  If SEARCH-OPTION (*note Search options::) refers to a
+     remote entry, it will be used instead.
+
+     The surrounding brackets can be made invisible by setting
+     ~org-hide-macro-markers~ non-~nil~.
+
+     Macro expansion takes place during the very beginning of the export
+   process.
+
+* Exporting
+** The Org mode export facilities can also be used with ~orgtbl-mode~ and/or ~orgstruct-mode~ in foreign buffers.
+** Export Setting                                                    :REVIEW:
+   In-buffer settings may appear anywhere in the file, either directly
+   or indirectly through a file included using ~#+SETUPFILE: filename~
+   syntax.  Option keyword sets tailored to a particular back-end can be
+   inserted from the export dispatcher (*note The export dispatcher::)
+   using the ~Insert template~ command by pressing <#>.  To insert
+   keywords individually, a good way to make sure the keyword is correct
+   is to type ~#+~ and then to use ~M-<TAB>~ for completion.
+
+   The export keywords available for every back-end, and their
+   equivalent global variables, include:
+
+   + ~AUTHOR~ :: The document author (~user-full-name~).
+   + ~CREATOR~ :: Entity responsible for output generation
+   + ~DATE~ :: A date or a time-stamp(1).
+   + ~EMAIL~ :: The email address (~user-mail-address~).
+** HTMl specific export settings
+   + ~HTML_DOCTYPE~ :: The document type, e.g. HTML5, (~org-html-doctype~).
+                       The ready-made options are:
+                       + "html4-strict"
+                       + "html4-transitional"
+                       + "html4-frameset"
+                       + "xhtml-strict"
+                       + "xhtml-transitional"
+                       + "xhtml-frameset"
+                       + "xhtml-11"
+                       + "html5"
+                       + "xhtml5"
+
+   + ~HTML_HEAD~ :: Arbitrary lines appended to the end of the head of the document.
+   + ~HTML_HEAD_EXTRA~ :: Arbitrary lines appended to the end of the header of the document
+** Links in HTML export                                              :REVIEW:
+   If you want to specify attributes for links, you can do so using a
+   special ~#+ATTR_HTML~ line to define attributes that will be added to
+   the ~<a>~ or ~<img>~ tags.  Here is an example that sets ~title~ and
+   ~style~ attributes for a link:
+
+   #+BEGIN_SRC orgmode
+#+ATTR_HTML: :title The Org mode homepage :style color:red;
+[[http://orgmode.org]］
+   #+END_SRC
+** Images in HTML export
+
+   HTML export can inline images given as links in the Org file, and it
+   can make an image the clickable part of a link.  By default(1), images
+   are inlined if a link does not have a description.  So
+   ~[[file˸myimg.jpg〕〕~ will be inlined, while ~[[file˸myimg.jpg〕[the
+   image〕〕~ will just produce a link ~the image~ that points to the image.
+   If the description part itself is a ~file:~ link or a ~http:~ URL
+   pointing to an image, this image will be inlined and activated so that
+   clicking on the image will activate the link.  For example, to include
+   a thumbnail that will link to a high resolution version of the image,
+   you could use:
+
+   :   [[file:highres.jpg〕[file:thumb.jpg]]
+** Text areas in HTML export
+   An alternative way to publish literal code examples in HTML is to use
+   text areas:
+   #+BEGIN_SRC orgmode
+#+ATTR_HTML: :textarea t :width 40
+#+BEGIN_EXAMPLE
+  (defun org-xor (a b)
+    "Exclusive or."
+    (if a (not b) b))
+#+END_EXAMPLE
+   #+END_SRC
+** Advanced configuration
+*** Hooks
+    Two hooks are run during the first steps of the export process.  The
+    first one, ~org-export-before-processing-hook~ is called before
+    expanding macros, Babel code and include keywords in the buffer.  The
+    second one, ~org-export-before-parsing-hook~, as its name suggests,
+    happens just before parsing the buffer.  Their main use is for heavy
+    duties, that is duties involving structural modifications of the
+    document.  For example, one may want to remove every headline in the
+    buffer during export.  The following code can achieve this:
+
+    #+BEGIN_SRC elisp
+      (defun my-headline-removal (backend)
+        "Remove all headlines in the current buffer.
+      BACKEND is the export back-end being used, as a symbol."
+        (org-map-entries
+         (lambda () (delete-region (point) (progn (forward-line) (point))))))
+
+      (add-hook 'org-export-before-parsing-hook 'my-headline-removal)
+    #+END_SRC
+
+    Note that functions used in these hooks require a mandatory argument,
+    a symbol representing the back-end used.
+
+*** Filters
+    Filters are lists of functions applied on a specific part of the output
+    from a given back-end.  More explicitly, each time a back-end
+    transforms an Org object or element into another language, all
+    functions within a given filter type are called in turn on the string
+    produced.  The string returned by the last function will be the one
+    used in the final output.
+
+    There are filter sets for each type of element or object, for plain
+    text, for the parse tree, for the export options and for the final
+    output.  They are all named after the same scheme:
+    ~org-export-filter-TYPE-functions~, where ~TYPE~ is the type targeted
+    by the filter.  Valid types are:
+
+    | body                | bold               | babel-call       |
+    | center-block        | clock              | code             |
+    | diary-sexp          | drawer             | dynamic-block    |
+    | entity              | example-block      | export-block     |
+    | export-snippet      | final-output       | fixed-width      |
+    | footnote-definition | footnote-reference | headline         |
+    | horizontal-rule     | inline-babel-call  | inline-src-block |
+    | inlinetask          | italic             | item             |
+    | keyword             | latex-environment  | latex-fragment   |
+    | line-break          | link               | node-property    |
+    | options             | paragraph          | parse-tree       |
+    | plain-list          | plain-text         | planning         |
+    | property-drawer     | quote-block        | radio-target     |
+    | section             | special-block      | src-block        |
+    | statistics-cookie   | strike-through     | subscript        |
+    | superscript         | table              | table-cell       |
+    | table-row           | target             | timestamp        |
+    | underline           | verbatim           | verse-block      |
+
+    For example, the following snippet allows me to use non-breaking
+    spaces in the Org buffer and get them translated into LaTeX without
+    using the ~\nbsp~ macro (where ~_~ stands for the non-breaking space):
+
+    #+BEGIN_SRC elisp
+      (defun my-latex-filter-nobreaks (text backend info)
+        "Ensure \"_\" are properly handled in LaTeX export."
+        (when (org-export-derived-backend-p backend 'latex)
+          (replace-regexp-in-string "_" "~" text)))
+
+      (add-to-list 'org-export-filter-plain-text-functions
+                   'my-latex-filter-nobreaks)
+    #+END_SRC
+
+    Three arguments must be provided to a filter: the code being
+    changed, the back-end used, and some information about the export
+    process.  You can safely ignore the third argument for most purposes.
+    Note the use of ~org-export-derived-backend-p~, which ensures that the
+    filter will only be applied when using ~latex~ back-end or any other
+    back-end derived from it (e.g., ~beamer~).
+
+*** Defining filters for individual files
+
+    You can customize the export for just a specific file by binding export
+    filter variables using ~#+BIND~.  Here is an example where we introduce
+    two filters, one to remove brackets from time stamps, and one to
+    entirely remove any strike-through text.  The functions doing the
+    filtering are defined in an src block that allows the filter function
+    definitions to exist in the file itself and ensures that the functions
+    will be there when needed.
+
+    #+BEGIN_VERSE
+#+BIND: org-export-filter-timestamp-functions (tmp-f-timestamp)
+#+BIND: org-export-filter-strike-through-functions (tmp-f-strike-through)
+#+begin_src emacs-lisp :exports results :results none
+  (defun tmp-f-timestamp (s backend info)
+    (replace-regexp-in-string "&[lg]t;\\|[][]" "" s))
+  (defun tmp-f-strike-through (s backend info) "")
+#+end_src
+    #+END_VERSE
+
+*** Extending an existing back-end
+
+    This is obviously the most powerful customization, since the changes
+    happen at the parser level.  Indeed, some export back-ends are built as
+    extensions of other ones (e.g., Markdown back-end an extension of HTML
+    back-end).
+
+    Extending a back-end means that if an element type is not transcoded
+    by the new back-end, it will be handled by the original one.  Hence you
+    can extend specific parts of a back-end without too much work.
+
+    As an example, imagine we want the ~ascii~ back-end to display the
+    language used in a source block, when it is available, but only when
+    some attribute is non-~nil~, like the following:
+
+    :   #+ATTR_ASCII: :language t
+
+    Because that back-end is lacking in that area, we are going to
+    create a new back-end, ~my-ascii~ that will do the job.
+
+    #+BEGIN_SRC elisp
+      (defun my-ascii-src-block (src-block contents info)
+        "Transcode a SRC-BLOCK element from Org to ASCII.
+      CONTENTS is nil.  INFO is a plist used as a communication
+      channel."
+        (if (not (org-export-read-attribute :attr_ascii src-block :language))
+            (org-export-with-backend 'ascii src-block contents info)
+          (concat
+           (format ",--[ %s ]--\n%s`----"
+                   (org-element-property :language src-block)
+                   (replace-regexp-in-string
+                    "^" "| "
+                    (org-element-normalize-string
+                     (org-export-format-code-default src-block info)))))))
+
+      (org-export-define-derived-backend 'my-ascii 'ascii
+        :translate-alist '((src-block . my-ascii-src-block)))
+    #+END_SRC
+
+    The ~my-ascii-src-block~ function looks at the attribute above the
+    element.  If it isn~t true, it gives hand to the ~ascii~ back-end.
+    Otherwise, it creates a box around the code, leaving room for the
+    language.  A new back-end is then created.  It only changes its
+    behavior when translating ~src-block~ type element.  Now, all it takes
+    to use the new back-end is calling the following from an Org buffer:
+
+    :     (org-export-to-buffer 'my-ascii "*Org MY-ASCII Export*")
+
+    It is obviously possible to write an interactive function for this,
+    install it in the export dispatcher menu, and so on.
+
+* Working with source code
+
+*** The structure of a ~src~ block
+
+    #+BEGIN_VERSE
+#+NAME: <name>
+#+BEGIN_SRC <language> <switches> <header arguments>
+  <body>
+#+END_SRC
+    #+END_VERSE
+
+*** Exporting code blocks
+    + ~:exports code~
+      The default in most languages.  The body of the code block is
+      exported, as described in *note Literal examples::.
+    + ~:exports results~
+      The code block will be evaluated each time to buffer is exported,
+      and the results will be placed in the Org mode buffer for export,
+      either updating previous results of the code block located
+      anywhere in the buffer or, if no previous results exist, placing
+      the results immediately after the code block.  The body of the
+      code block will not be exported.
+    + ~:exports both~
+      Both the code block and its results will be exported.
+    + ~:exports none~
+      Neither the code block nor its results will be exported.
+
+*** Extracting source code
+**** Header arguments
+     + ~:tangle no~
+       The default.  The code block is not included in the tangled output.
+     + ~:tangle yes~
+       Include the code block in the tangled output.  The output file
+       name is the name of the org file with the extension ~.org~
+       replaced by the extension for the block language.
+     + ~:tangle filename~
+       Include the code block in the tangled output to file ~filename~.
+
+**** Functions
+     + ~org-babel-tangle~
+       Tangle the current file.  Bound to ~C-c C-v t~.
+       With prefix argument only tangle the current code block.
+     + ~org-babel-tangle-file~
+       Choose a file to tangle.  Bound to ~C-c C-v f~.
+
+*** Evaluating code blocks
+    By default, the evaluation facility is only enabled for Lisp code
+    blocks specified as ~emacs-lisp~.
+    The option ~org-babel-load-languages~ controls which languages are
+    enabled for evaluation (by default only ~emacs-lisp~ is enabled).  This
+    variable can be set using the customization interface or by adding code
+    like the following to your emacs configuration.
+
+    The following disables ~emacs-lisp~ evaluation and enables
+    evaluation of ~R~ code blocks.
+
+    #+BEGIN_SRC elisp
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((emacs-lisp . nil)
+         (R . t)))
+    #+END_SRC
+
+    It is also possible to enable support for a language by loading the
+    related elisp file with ~require~.
+
+    The following adds support for evaluating ~clojure~ code blocks.
+
+    :    (require 'ob-clojure)
