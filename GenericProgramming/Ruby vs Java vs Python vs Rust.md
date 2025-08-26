@@ -30,6 +30,12 @@
     let y = x.allSatisfy { $0 < 10 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5].all? { |x| x < 10 }
+    ```
+
 ### any?
 
 1.  Java
@@ -58,6 +64,12 @@
     let y = x.contains { $0 < 10 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5].any? { |x| x < 10 }
+    ```
+
 ### collect / map
 
 1.  Java
@@ -84,6 +96,14 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.map { $0 * 2 }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].map { |x| x * 2 }
+    # 或
+    [1, 2, 3, 4].collect { |x| x * 2 }
     ```
 
 ### `flat_map`
@@ -121,6 +141,15 @@
     let y = x.flatMap { $0 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [[1, 2, 3], [4, 5, 6]]
+    x.flat_map { |e| e }
+    # 或
+    x.flat_map(&:itself)
+    ```
+
 ### count
 
 1.  Java
@@ -149,6 +178,12 @@
     let y = x.count { $0 < 3 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].count { |e| e < 3 }
+    ```
+
 ### find
 
 1.  Java
@@ -175,6 +210,14 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.first { $0 > 3 }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5, 6].find { |e| e > 3 }
+    # 或
+    [1, 2, 3, 4, 5, 6].detect { |e| e > 3 }
     ```
 
 ### `each_with_index`
@@ -228,6 +271,13 @@
     }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [1, 2, 3, 4]
+    x.each_with_index { |e, i| puts "#{i}: #{e}" }
+    ```
+
 ### `each_with_object`
 
 1.  Java
@@ -272,6 +322,16 @@
     let y = x.reduce(into: [:]) { $0[$1, default: 0] += 1 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    h = { a: 1, b: 2, c: 3 }
+    result = h.each_with_object({}) { |(k, v), hash| hash[k] = v }
+    # 计数示例
+    x = [1, 2, 3, 4, 3, 2]
+    counts = x.each_with_object(Hash.new(0)) { |n, acc| acc[n] += 1 }
+    ```
+
 ### entries
 
 1.  Java
@@ -301,6 +361,15 @@
     }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    h = { a: 1, b: 2 }
+    h.entries # => [[:a, 1], [:b, 2]]
+    # 或
+    h.to_a
+    ```
+
 ### `find_all` / select / filter
 
 1.  Java
@@ -327,6 +396,14 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.filter { $0 > 2 }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].select { |e| e > 2 }
+    # 或
+    [1, 2, 3, 4].find_all { |e| e > 2 }
     ```
 
 ### `group_by`
@@ -374,6 +451,14 @@
     let y = Dictionary(grouping: x, by: { $0 % 2 == 0 })
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [1, 2, 3, 4]
+    x.group_by { |e| e.even? }
+    # => {false=>[1, 3], true=>[2, 4]}
+    ```
+
 ### inject / reduce
 
 1.  Java
@@ -402,6 +487,14 @@
     let y = x.reduce(0, +)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].inject(0, :+)
+    # 或
+    [1, 2, 3, 4].reduce(0) { |s, e| s + e }
+    ```
+
 ### map
 
 1.  Java
@@ -428,6 +521,12 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.map { $0 * 2 }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].map { |x| x * 2 }
     ```
 
 ### max / `max_by`
@@ -464,6 +563,13 @@
     let y = x.max { $0 < $1 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].max
+    [1, 2, 3, 4].max_by { |e| -e }
+    ```
+
 ### partition
 
 1.  Java
@@ -495,6 +601,13 @@
     var second = names[idx...]
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].partition { |e| e > 2 }
+    # => [[3, 4], [1, 2]]
+    ```
+
 ### `reverse_each`
 
 1.  Java
@@ -522,6 +635,12 @@
     ``` swift
     let x = [1, 2, 3, 4]
     x.reversed().forEach { print($0) }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].reverse_each { |e| puts e }
     ```
 
 ### sort
@@ -556,6 +675,12 @@
     ``` swift
     let x = [2, 3, 1, 4]
     let y = x.sorted()
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [2, 3, 1, 4].sort
     ```
 
 ### `sort_by`
@@ -593,6 +718,17 @@
     let y = x.sorted { $0 < $1 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    people = [
+      { name: "Jack", age: 20 },
+      { name: "David", age: 10 },
+      { name: "Lucy", age: 30 }
+    ]
+    people.sort_by { |p| p[:age] }
+    ```
+
 ### sum
 
 1.  Java
@@ -620,6 +756,14 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.reduce(0, +)
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].sum
+    # 早期 Ruby 可使用 inject:
+    [1, 2, 3, 4].inject(0, :+)
     ```
 
 ### uniq
@@ -651,6 +795,12 @@
 
     import Algorithm
     let y = x.uniqued()
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 1, 2, 3].uniq
     ```
 
 ### zip
@@ -688,6 +838,13 @@
     let x = [1, 2, 3]
     let y = [4, 5, 6]
     let zipped = zip(x, y)
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3].zip([4, 5, 6])
+    # => [[1, 4], [2, 5], [3, 6]]
     ```
 
 ## Array
@@ -731,6 +888,12 @@
     let c = a.intersection(b)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5] & [1, 3, 5, 6]
+    ```
+
 ### \|
 
 1.  Java
@@ -770,6 +933,12 @@
     let c = a.union(b)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2] | [2, 3]
+    ```
+
 ### +
 
 1.  Java
@@ -799,6 +968,12 @@
     let x = [1, 2]
     let y = [3, 4]
     let z = x + y
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2] + [3, 4]
     ```
 
 ### -
@@ -835,6 +1010,12 @@
     let c = a.subtracting(b)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5] - [2, 5]
+    ```
+
 ### \<\<
 
 1.  Java
@@ -864,6 +1045,14 @@
     x.append(4)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [1, 2, 3]
+    x << 4
+    x.push(5)
+    ```
+
 ### compact
 
 1.  Java
@@ -888,6 +1077,12 @@
     ``` swift
     let x = [1, 2, nil, 3, 4]
     let y = x.compactMap { $0 }
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, nil, 3, 4].compact
     ```
 
 ### delete
@@ -916,6 +1111,14 @@
     var x = [1, 2, 3, 4]
     x.remove(at: 1) // remove by index
     x.removeAll { $0 == 3 } // remove by value
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    x = [3, 4, 5, 6]
+    x.delete(3)    # 按值删除
+    x.delete_at(1) # 按索引删除
     ```
 
 ### flatten
@@ -950,6 +1153,14 @@
     let y = x.flatMap { $0 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [[1, 2, 3], [4, 5, 6]].flatten
+    # 指定层级：
+    [[1, [2]], [3]].flatten(1)
+    ```
+
 ### include?
 
 1.  Java
@@ -979,6 +1190,12 @@
     let y = x.contains(2)
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].include?(2)
+    ```
+
 ### join
 
 1.  Java
@@ -1006,6 +1223,12 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.map { String($0) }.joined(separator: ",")
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].join(",")
     ```
 
 ### last
@@ -1041,6 +1264,12 @@
     let y = x.last
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].last
+    ```
+
 ### first
 
 1.  Java
@@ -1069,6 +1298,12 @@
     ``` swift
     let x = [1, 2, 3, 4]
     let y = x.first
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].first
     ```
 
 ### push / pop / shift / unshift
@@ -1113,6 +1348,16 @@
     x.insert(0, 0) // unshift
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [1, 2, 3, 4]
+    x.push(5)     # push
+    x.pop         # pop
+    x.shift       # shift
+    x.unshift(0)  # unshift
+    ```
+
 ### reverse
 
 1.  Java
@@ -1145,6 +1390,13 @@
     var y = x.reversed()  // 返回一个新的数组
     ```
 
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].reverse      # 返回新数组
+    x = [1, 2, 3, 4]; x.reverse!  # 原地修改
+    ```
+
 ### rotate
 
 1.  Java
@@ -1167,6 +1419,13 @@
 4.  swift
 
     无
+
+5.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4].rotate      # => [2, 3, 4, 1]
+    [1, 2, 3, 4].rotate(2)   # => [3, 4, 1, 2]
+    ```
 
 ### shuffle
 
@@ -1203,6 +1462,14 @@
     var y = x.shuffled()  // 返回一个新的数组
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = [1, 2, 3, 4]
+    x.shuffle   # 返回新数组
+    x.shuffle!  # 原地修改
+    ```
+
 ### sample
 
 1.  Java
@@ -1220,6 +1487,14 @@
     ``` swift
     let x = [1, 2, 3, 4, 5]
     let y = x.shuffled().prefix(3)
+    ```
+
+4.  Ruby
+
+    ``` ruby
+    [1, 2, 3, 4, 5].sample(3)
+    # 单个元素：
+    [1, 2, 3, 4, 5].sample
     ```
 
 ## Hash
@@ -1264,6 +1539,17 @@
     x.values.forEach { print($0) }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    h = { name: 'Jack', age: 1 }
+    h.each_key { |k| puts k }
+    h.each_value { |v| puts v }
+    # 或：
+    h.keys  # => [:name, :age]
+    h.values # => ['Jack', 1]
+    ```
+
 ### invert
 
 1.  Java
@@ -1287,6 +1573,13 @@
     ``` swift
     let x = ["name": "Jack", "age": 1]
     let y = Dictionary(uniqueKeysWithValues: x.map { ($1, $0) })
+    ```
+
+5.  Ruby
+
+    ``` ruby
+    { name: 'Jack', age: 1 }.invert
+    # => {"Jack"=>:name, 1=>:age}
     ```
 
 ### merge
@@ -1337,6 +1630,17 @@
     let z = x.merging(y) { $1 }
     ```
 
+5.  Ruby
+
+    ``` ruby
+    x = { name: 'Jack', age: 1 }
+    y = { name: 'David', age: 2 }
+    x.merge(y)            # 非破坏性
+    x.merge!(y)           # 破坏性
+    # 自定义冲突解决：
+    x.merge(y) { |_k, old, newv| newv }
+    ```
+
 ### `transform_keys` / `transform_values`
 
 1.  Java
@@ -1360,6 +1664,15 @@
 4.  swift
 
     无
+
+5.  Ruby
+
+    ``` ruby
+    h = { 'Name' => 'Jack', 'Age' => 1 }
+    h.transform_keys(&:downcase)      # => {"name"=>"Jack", "age"=>1}
+    h.transform_values { |v| v.to_s } # => {"Name"=>"Jack", "Age"=>"1"}
+    # 非破坏性版本；破坏性：transform_keys! / transform_values!
+    ```
 
 ### values
 
@@ -1388,6 +1701,12 @@
     let y = x.values
     ```
 
+5.  Ruby
+
+    ``` ruby
+    { name: 'Jack', age: 1 }.values
+    ```
+
 ### `values_at`
 
 1.  Java
@@ -1411,6 +1730,13 @@
 
     无
 
+5.  Ruby
+
+    ``` ruby
+    h = { name: 'Jack', age: 1, city: 'BJ' }
+    h.values_at(:name, :city)  # => ["Jack", "BJ"]
+    ```
+
 ### slice
 
 1.  Java
@@ -1430,6 +1756,14 @@
 4.  swift
 
     无
+
+5.  Ruby
+
+    ``` ruby
+    h = { name: 'Jack', age: 1, city: 'BJ' }
+    h.slice(:name, :city)  # => { name: 'Jack', city: 'BJ' }
+    # ActiveSupport 早期提供 Hash#slice，Ruby 3.0+ 也内置
+    ```
 
 # Strings
 
@@ -1484,6 +1818,19 @@ let b = String(format: "%d %d", 1, 2)
 let c = String(format: "%04d", 42)
 ```
 
+### Ruby
+
+``` ruby
+"hello %s %s" % ["Jack", "David"]
+
+"%d %s cost $%.2f" % [6, 'bananas', 1.74]
+
+format('%d %s cost $%.2f', 6, 'bananas', 1.74)
+
+template = "Hi %{name}! Your number is %{number}"
+template % { name: 'John', number: 1 }
+```
+
 ## \*
 
 ### Java
@@ -1513,6 +1860,12 @@ let x = "hello"
 let y = String(repeating: x, count: 3)
 ```
 
+### Ruby
+
+``` ruby
+"hello" * 3
+```
+
 ## \<\<
 
 ### Java
@@ -1524,6 +1877,13 @@ StringBuilder#append()
 ### Python
 
 无
+
+### Ruby
+
+``` ruby
+{ a: 1, b: 2 }.inspect
+%w[a b c].inspect
+```
 
 ### Rust
 
@@ -1540,6 +1900,14 @@ y.push_str("world");
 var x = "hello"
 x += " world"
 x.append(contentsOf: " world")
+```
+
+### Ruby
+
+``` ruby
+x = "hello"
+x << " world"
+x.concat(" world")
 ```
 
 ## =~
@@ -1579,6 +1947,27 @@ if string.matches(of: regex).count > 0 {
 }
 ```
 
+### Ruby
+
+``` ruby
+"The quick brown fox".scan(/[a-z]+/)
+"abc123DEF".scan(/[a-z]+(?:([0-9]+)|([A-Z]+))/)
+```
+
+### Ruby
+
+``` ruby
+"Hello123World456".sub(/\d+/, '***')
+"Hello123World456".gsub(/\d+/) { |m| '*' * ((m.to_i % 3) + 1) }
+```
+
+### Ruby
+
+``` ruby
+/hello[0-9]+/.match?('hello1')
+"hello1" =~ /hello\d+/   # 返回匹配位置或 nil
+```
+
 ## bytes
 
 ### Java
@@ -1606,6 +1995,13 @@ let x = "hello"
 let y = x.data(using: .utf8)
 ```
 
+### Ruby
+
+``` ruby
+"hello".bytes
+"hello".encode('UTF-8')
+```
+
 ## capitalize
 
 ### Java
@@ -1629,6 +2025,12 @@ StringUtils.capitalize(); // commons-lang
 ``` swift
 let x = "hello"
 let y = x.capitalized
+```
+
+### Ruby
+
+``` ruby
+"hello".capitalize
 ```
 
 ## chars / codepoints
@@ -1661,6 +2063,13 @@ let x = "hello"
 let y = x.map { $0 }
 ```
 
+### Ruby
+
+``` ruby
+"hello".chars       # => ["h", "e", "l", "l", "o"]
+"hello".codepoints  # => [104, 101, 108, 108, 111]
+```
+
 ## chomp!
 
 ### Java
@@ -1684,6 +2093,13 @@ StringUtils.chomp(); // commons-lang
 ``` swift
 let x = "hello\n"
 let y = x.trimmingCharacters(in: .newlines)
+```
+
+### Ruby
+
+``` ruby
+"hello\n".chomp!
+"hello\n".chomp
 ```
 
 ## chr / ord
@@ -1711,6 +2127,13 @@ let x = "hello"
 let y = x.unicodeScalars.first?.value
 ```
 
+### Ruby
+
+``` ruby
+97.chr
+"a".ord
+```
+
 ## upcase / downcase
 
 ### Java
@@ -1734,6 +2157,13 @@ to<sub>upercase</sub> / to<sub>lowercase</sub>
 let x = "hello"
 let y = x.uppercased()
 let z = x.lowercased()
+```
+
+### Ruby
+
+``` ruby
+"hello".upcase
+"HELLO".downcase
 ```
 
 ## each<sub>line</sub> / lines
@@ -1768,6 +2198,13 @@ let x = "hello\nworld"
 let y = x.split(separator: "\n")
 ```
 
+### Ruby
+
+``` ruby
+"hello\nworld".each_line { |line| puts line }
+"hello\nworld".lines
+```
+
 ## `start_with?` / `end_with?`
 
 ### Java
@@ -1791,6 +2228,13 @@ starts<sub>with</sub> / ends<sub>with</sub>
 let x = "hello"
 let y = x.hasPrefix("he")
 let z = x.hasSuffix("lo")
+```
+
+### Ruby
+
+``` ruby
+"hello".start_with?("he")
+"hello".end_with?("lo")
 ```
 
 ## sub / gsub
@@ -1923,6 +2367,12 @@ var str = "Hello123World456"
 var reversed_str = String(str.reversed())
 ```
 
+### Ruby
+
+``` ruby
+"hello".reverse
+```
+
 ## scan
 
 ### Java
@@ -1995,6 +2445,12 @@ let x = "hello world"
 let y = x.split(separator: " ")
 ```
 
+### Ruby
+
+``` ruby
+"hello world".split(' ')
+```
+
 # IOs
 
 ## each / `each_line`
@@ -2043,6 +2499,19 @@ let file = try! String(contentsOfFile: path)
 let lines = file.split(separator: "\n")
 ```
 
+### Ruby
+
+``` ruby
+File.foreach('foo.txt').with_index { |line, idx| puts "Line #{idx}: #{line}" }
+
+# 或一次性读入：
+File.readlines('myfile.txt')
+
+# Ruby 3+:
+require 'pathname'
+Pathname('foo.txt').read.split("\n")
+```
+
 ## read / readlines
 
 ### Java
@@ -2062,6 +2531,13 @@ let path = "foo.txt"
 let file = try! String(contentsOfFile: path, encoding: .utf8)
 
 let lines = file.split(separator: "\n")
+```
+
+### Ruby
+
+``` ruby
+File.read('foo.txt', encoding: 'UTF-8')
+File.readlines('foo.txt', chomp: true)
 ```
 
 ## basename / dirname
@@ -2104,6 +2580,15 @@ let parent = (path as NSString).deletingLastPathComponent
 let file = (path as NSString).lastPathComponent
 ```
 
+### Ruby
+
+``` ruby
+require 'pathname'
+path = Pathname.new('foo/bar.txt')
+path.dirname.to_s   # => "foo"
+path.basename.to_s  # => "bar.txt"
+```
+
 ## `absolute_path`
 
 ### Java
@@ -2138,6 +2623,13 @@ fn main() {
 ``` swift
 let path = "foo/bar.txt"
 let absolutePath = (path as NSString).expandingTildeInPath
+```
+
+### Ruby
+
+``` ruby
+require 'pathname'
+Pathname.new('foo/bar.txt').realpath.to_s
 ```
 
 ## atime / mtime
@@ -2175,6 +2667,15 @@ let creationDate = attributes[.creationDate] as! Date
 let modificationDate = attributes[.modificationDate] as! Date
 ```
 
+### Ruby
+
+``` ruby
+st = File.stat('foo.txt')
+st.atime
+st.mtime
+st.ctime
+```
+
 ## chmod / chown
 
 ### Java
@@ -2205,6 +2706,14 @@ let fileManager = FileManager.default
 try! fileManager.setAttributes([.posixPermissions: 0o777], ofItemAtPath: path)
 // chown
 try! fileManager.setAttributes([.ownerAccountID: 501], ofItemAtPath: path)
+```
+
+### Ruby
+
+``` ruby
+File.chmod(0o777, 'foo.txt')
+# chown 需要 uid/gid
+File.chown(501, 20, 'foo.txt')
 ```
 
 ## directory?
@@ -2248,6 +2757,13 @@ if exists {
 }
 ```
 
+### Ruby
+
+``` ruby
+File.directory?('foo')
+File.file?('foo.txt')
+```
+
 ## exists?
 
 ### Java
@@ -2280,6 +2796,12 @@ let exists = fileManager.fileExists(atPath: path)
 print(exists)
 ```
 
+### Ruby
+
+``` ruby
+File.exist?('foo.txt')
+```
+
 ## join
 
 ### Java
@@ -2306,6 +2828,12 @@ assert_eq!(Path::new("/etc").join("passwd"), PathBuf::from("/etc/passwd"));
 let path = "foo"
 let path2 = "bar"
 let joinedPath = path + "/" + path2
+```
+
+### Ruby
+
+``` ruby
+File.join('foo', 'bar') # => "foo/bar"
 ```
 
 ## size
@@ -2343,6 +2871,12 @@ let attributes = try! fileManager.attributesOfItem(atPath: path)
 let size = attributes[.size] as! Int
 ```
 
+### Ruby
+
+``` ruby
+File.size('foo.txt')
+```
+
 # Active Support
 
 ## present?
@@ -2367,6 +2901,15 @@ if !x.isEmpty {
 }
 ```
 
+### Ruby (Active Support)
+
+``` ruby
+require 'active_support/core_ext/object/blank'
+"hello".present?   # => true
+"".present?        # => false
+[].present?         # => false
+```
+
 ## blank?
 
 ### Java
@@ -2383,6 +2926,17 @@ CollectionUtils.isEmpty();
 ### Swift
 
 无
+
+### Ruby (Active Support)
+
+``` ruby
+require 'active_support/core_ext/object/blank'
+"".blank?        # => true
+"  ".blank?      # => true
+nil.blank?       # => true
+[].blank?        # => true
+"hello".blank?   # => false
+```
 
 ## `in_groups`
 
@@ -2411,6 +2965,14 @@ extension Array {
         return stride(from: 0, to: self.count, by: groupSize).map { Array(self[$0..<Swift.min($0 + groupSize, self.count)]) }
     }
 }
+```
+
+### Ruby (Active Support)
+
+``` ruby
+require 'active_support/core_ext/array/grouping'
+(0...20).to_a.in_groups(6)
+(0...20).to_a.in_groups(6, nil) # 填充
 ```
 
 ## `in_groups_of`
@@ -2444,5 +3006,13 @@ extension Array {
         return stride(from: 0, to: self.count, by: groupSize).map { Array(self[$0..<Swift.min($0 + groupSize, self.count)]) }
     }
 }
+```
+
+### Ruby (Active Support)
+
+``` ruby
+require 'active_support/core_ext/array/grouping'
+(0...20).to_a.in_groups_of(6)
+(0...20).to_a.in_groups_of(6, nil) # 填充指定值
 ```
 
